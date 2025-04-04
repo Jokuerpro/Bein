@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع IPTV احترافي</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
+    <style>
+        .notification {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-5 rounded-lg shadow-lg bg-gray-800">
+        <h2 class="text-3xl font-bold mb-6 text-center">موقع IPTV احترافي</h2>
+        <input type="text" id="searchBar" class="form-input mt-2 mb-4 p-3 rounded-lg border border-gray-600 bg-gray-700" placeholder="ابحث عن قناة" oninput="filterChannels()">
+
+        <div class="flex justify-between items-center mb-4">
+            <select id="categoryFilter" class="form-select bg-gray-700 text-white rounded-lg" onchange="filterChannels()">
+                <option value="">كل الفئات</option>
+                <option value="رياضة">رياضة</option>
+                <option value="أخبار">أخبار</option>
+                <option value="أفلام">أفلام</option>
+            </select>
+            <button id="favoriteButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="toggleFavorites()">إظهار المفضلة</button>
+        </div>
+
+        <div class="channel-list h-60 overflow-y-auto bg-gray-700 rounded-lg p-2 mb-4" id="channelList"></div>
+
+        <div class="player bg-black rounded-lg p-4 text-center">
+            <h3 class="text-lg mb-2">مشغل القنوات</h3>
+            <video id="videoPlayer" class="video-js vjs-default-skin w-full" controls preload="auto" width="640" height="264"></video>
+            <div class="notification bg-blue-800 text-center p-2 rounded mt-2" id="notification"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
+    <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
+    <script>
+        let channels = [];
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let lastUrl = 'http://forevertv.me:8080/get.php?username=ptcdYX1E3RtYWF&password=eNr2GkYz0eDfkM&output=ts&type=m3u_plus'; // الرابط المدمج
+        let showFavorites = false;
+        let videoPlayer = document.getElementById('videoPlayer');
+        let hls;
+
+        async function loadChannels() {
+            const serverUrl = lastUrl; // استخدام الرابط المدمج
+            if (!serverUrl) {
+                alert('يرجى إدخال الرابط!');
+                return;
+            }
+
+            localStorage.setItem('lastUrl', serverUrl); // حفظ الرابط الأخير
+
+            try {
+                const response = await fetch(serverUrl);
+                const data = await response.text();
+                channels = parseM3U(data); // تحليل البيانات
+                loadChannelList();
+            } catch (error) {
+                alert('حدث خطأ أثناء تحميل القنوات!');
+                console.error(error);
+            }
+        }
+
+        function parseM3U(data) {
+            const lines = data.split('\n');
+            const channels = [];
+            let currentChannel = {};
+
+            lines.forEach(line => {
+                if (line.startsWith('#EXTINF')) {
+                    const info = line.split(',');
+                    currentChannel.name = info[1];
+                    currentChannel.url = lines[lines.indexOf(line) + 1]; // الحصول على الرابط مباشرة بعد السطر
+                    currentChannel.category = info[0].includes("group-title") ? info[0].match(/group-title="(.*?)"/)?.[1] : "غير محدد";
+                    channels.push(currentChannel);
+                    currentChannel = {};
+                }
+            });
+
+            return channels;
+        }
+
+        function loadChannelList() {
+            const channelListElement = document.getElementById('channelList');
+            channelListElement.innerHTML = '';
+            const filteredChannels = showFavorites ? channels.filter(channel => favorites.includes(channel.url)) : channels;
+            filteredChannels.forEach(channel => {
+                const listItem = document.createElement('div');
+                listItem.className = 'channel-item bg-gray-600 hover:bg-blue-700 cursor-pointer p-2 rounded-lg my-1 flex justify-between items-center';
+                listItem.textContent = channel.name;
+                listItem.onclick = () => playChannel(channel.url, channel.name);
+                const favoriteButton = document.createElement('button');
+                favoriteButton.textContent = favorites.includes(channel.url) ? 'إزالة' : 'إضافة';
+                favoriteButton.className = 'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded-lg';
+                favoriteButton.onclick = (e) => {
+                    e.stopPropagation(); // لمنع تنفيذ onclick للقناة
+                    toggleFavorite(channel.url);
+                };
+                listItem.appendChild(favoriteButton);
+                channelListElement.appendChild(listItem);
+            });
+        }
+
+        function toggleFavorite(url) {
+            if (favorites.includes(url)) {
+                favorites = favorites.filter(fav => fav !== url);
+            } else {
+                favorites.push(url);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            loadChannelList();
+        }
+
+        function toggleFavorites() {
+            showFavorites = !showFavorites;
+            document.getElementById('favoriteButton').textContent = showFavorites ? 'إظهار الكل' : 'إظهار المفضلة';
+            loadChannelList();
+        }
+
+        function playChannel(url, name) {
+            // التأكد من أن هناك مشغل HLS موجود
+            if (hls) {
+                hls.destroy(); // تدمير المشغل السابق إذا كان موجودًا
+            }
+
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(videoPlayer);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoPlayer.play().catch(error => {
+                        console.error('خطأ في التشغيل التلقائي:', error);
+                        alert('فشل في التشغيل التلقائي. يرجى الضغط على زر التشغيل.');
+                    });
+                });
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS Error:', data);
+                    if (data.fatal) {
+                        switch(data.fatal) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                alert('خطأ في الشبكة. تحقق من الاتصال.');
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                alert('خطأ في تدفق الوسائط.');
+                                break;
+                            case Hls.ErrorTypes.OTHER_ERROR:
+                                alert('خطأ غير معروف.');
+                                break;
+                        }
+                    }
+                });
+            } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                videoPlayer.src = url;
+                videoPlayer.addEventListener('loadedmetadata', function() {
+                    videoPlayer.play().catch(error => {
+                        console.error('خطأ في التشغيل التلقائي:', error);
+                        alert('فشل في التشغيل التلقائي. يرجى الضغط على زر التشغيل.');
+                    });
+                });
+            }
+            document.getElementById('notification').textContent = `جاري تشغيل: ${name}`;
+            document.getElementById('notification').style.display = 'block';
+            setTimeout(() => document.getElementById('notification').style.display = 'none', 3000);
+        }
+
+        function filterChannels() {
+            const searchQuery = document.getElementById('searchBar').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const filteredChannels = channels.filter(channel => 
+                channel.name.toLowerCase().includes(searchQuery) &&
+                (categoryFilter === "" || channel.category === categoryFilter)
+            );
+            const channelListElement = document.getElementById('channelList');
+            channelListElement.innerHTML = '';
+            filteredChannels.forEach(channel => {
+                const listItem = document.createElement('div');
+                listItem.className = 'channel-item bg-gray-600 hover:bg-blue-700 cursor-pointer p-2 rounded-lg my-1 flex justify-between items-center';
+                listItem.textContent = channel.name;
+                listItem.onclick = () => playChannel(channel.url, channel.name);
+                const favoriteButton = document.createElement('button');
+                favoriteButton.textContent = favorites.includes(channel.url) ? 'إزالة' : 'إضافة';
+                favoriteButton.className = 'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded-lg';
+                favoriteButton.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(channel.url);
+                };
+                listItem.appendChild(favoriteButton);
+                channelListElement.appendChild(listItem);
+            });
+        }
+
+        // تحميل القنوات عند بدء تشغيل الصفحة
+        loadChannels();
+    </script>
+</body>
+</html>
