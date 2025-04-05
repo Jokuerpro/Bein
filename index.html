@@ -30,14 +30,6 @@
             background-color: #ffcccc; /* خلفية حمراء */
             color: #900000; /* نص داكن */
         }
-        .theme-green {
-            background-color: #ccffcc; /* خلفية خضراء */
-            color: #006600; /* نص داكن */
-        }
-        .theme-blue {
-            background-color: #ccffff; /* خلفية زرقاء */
-            color: #003366; /* نص داكن */
-        }
     </style>
 </head>
 <body class="bg-gray-900 text-white theme-red">
@@ -52,6 +44,7 @@
         <div class="mb-4">
             <label for="qualitySelect" class="mr-2">اختر الجودة:</label>
             <select id="qualitySelect" class="form-select bg-gray-700 text-white rounded-lg">
+                <option value="1080">1080p</option>
                 <option value="720">720p</option>
                 <option value="480">480p</option>
             </select>
@@ -73,8 +66,8 @@
             <div class="notification bg-blue-800 text-center p-2 rounded mt-2" id="notification"></div>
         </div>
 
-        <!-- زر لتغيير السمة -->
-        <button id="themeToggle" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">تغيير السمة</button>
+        <!-- زر لتغيير السمة (تم حذفه) -->
+        <button id="themeToggle" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded" style="display:none;">تغيير السمة</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
@@ -84,8 +77,6 @@
         let videoPlayer = document.getElementById('videoPlayer');
         let hls;
         let checkInterval;
-        let currentThemeIndex = 0; // مؤشر السمة الحالية
-        const themes = ['theme-red', 'theme-green', 'theme-blue']; // مصفوفة الأشكال
 
         // حفظ الرابط في التخزين المحلي
         const savedUrl = localStorage.getItem('savedUrl');
@@ -225,8 +216,8 @@
                         alert('فشل في التشغيل التلقائي. محاولة تشغيل الدقة الأقل.');
 
                         // محاولة ضبط دقة أقل
-                        if (targetLevel === 720 && availableLevels.includes(480)) {
-                            hls.currentLevel = availableLevels.indexOf(480);
+                        if (targetLevel === 1080 && availableLevels.includes(720)) {
+                            hls.currentLevel = availableLevels.indexOf(720);
                             videoPlayer.play().catch(error => {
                                 console.error('فشل تشغيل الدقة الأقل:', error);
                             });
@@ -315,13 +306,6 @@
 
         // بدء التحقق الدوري كل 10 دقائق
         checkInterval = setInterval(checkChannelsPeriodically, 600000); // كل 10 دقائق
-
-        // تغيير السمة
-        document.getElementById('themeToggle').onclick = function() {
-            currentThemeIndex = (currentThemeIndex + 1) % themes.length; // تغيير المؤشر
-            document.body.className = `bg-gray-900 text-white ${themes[currentThemeIndex]}`; // تغيير السمة
-            this.textContent = `تغيير إلى ${themes[(currentThemeIndex + 1) % themes.length]}`; // تحديث نص الزر
-        };
     </script>
 </body>
 </html>
