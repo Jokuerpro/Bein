@@ -7,49 +7,22 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
     <style>
-        .notification {
-            display: none;
-        }
-        .channel-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 5px 0;
-            background-color: #2d3748; /* لون خلفية العنصر */
-            transition: background-color 0.3s; /* تأثير الانتقال */
-        }
-        .channel-item:hover {
-            background-color: #4a5568; /* لون الخلفية عند التحويم */
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background-color: #1a202c; /* خلفية التطبيق */
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-        .player {
-            background-color: #2d3748; /* لون خلفية المشغل */
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
+        .notification { display: none; }
+        .channel-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 8px; margin: 5px 0; background-color: #2d3748; transition: background-color 0.3s; }
+        .channel-item:hover { background-color: #4a5568; }
+        .container { max-width: 800px; margin: auto; padding: 20px; background-color: #1a202c; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+        .player { background-color: #2d3748; border-radius: 10px; padding: 20px; margin-top: 20px; }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
     <div class="container">
         <h2 class="text-3xl font-bold mb-6 text-center">موقع IPTV احترافي</h2>
         
-        <!-- إدخال رابط ملف M3U -->
         <div class="mb-4">
             <label for="urlInput" class="block">إدخال رابط ملف M3U:</label>
             <input type="text" id="urlInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط ملف M3U" />
         </div>
 
-        <!-- إدخال رابط Xtream IPTV -->
         <div class="mb-4">
             <label for="xtreamInput" class="block">إدخال رابط Xtream IPTV:</label>
             <input type="text" id="xtreamInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط Xtream IPTV" />
@@ -57,7 +30,6 @@
 
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="loadM3U()">تحميل</button>
 
-        <!-- إعدادات الجودة -->
         <div class="mb-4">
             <label for="qualitySelect" class="mr-2">اختر الجودة:</label>
             <select id="qualitySelect" class="form-select bg-gray-800 text-white rounded-lg shadow-md">
@@ -100,9 +72,9 @@
                 fetch(url)
                     .then(response => response.text())
                     .then(data => {
-                        channels = parseM3U(data); // تحليل البيانات
+                        channels = parseM3U(data);
                         updateCategorySelect();
-                        notifyUser('تم تحميل القنوات من ملف M3U بنجاح!'); // إشعار عند التحميل
+                        notifyUser('تم تحميل القنوات من ملف M3U بنجاح!');
                     })
                     .catch(error => {
                         console.error('خطأ في تحميل ملف M3U:', error);
@@ -114,16 +86,16 @@
                 fetch(xtreamUrl)
                     .then(response => response.text())
                     .then(data => {
-                        channels = parseM3U(data); // يجب أن يكون لديك منطق لتحليل البيانات هنا
+                        channels = parseM3U(data); // تحليل البيانات من Xtream
                         updateCategorySelect();
-                        notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!'); // إشعار عند التحميل
+                        notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!');
                     })
                     .catch(error => {
                         console.error('خطأ في تحميل رابط Xtream IPTV:', error);
                         alert('فشل في تحميل رابط Xtream IPTV. تحقق من الرابط.');
                     });
             } else {
-                alert('يرجى إدخال رابط ملف M3U أو رابط Xtream IPTV.'); // رسالة تنبيه في حالة عدم وجود رابط
+                alert('يرجى إدخال رابط ملف M3U أو رابط Xtream IPTV.');
             }
         }
 
@@ -136,10 +108,9 @@
                 if (line.startsWith('#EXTINF')) {
                     const info = line.split(',');
                     currentChannel.name = info[1].trim();
-                    currentChannel.url = lines[lines.indexOf(line) + 1].trim(); // الحصول على الرابط مباشرة بعد السطر
+                    currentChannel.url = lines[lines.indexOf(line) + 1].trim();
                     currentChannel.category = info[0].includes("group-title") ? info[0].match(/group-title="(.*?)"/)?.[1] : "غير محدد";
 
-                    // تصنيف القناة حسب الفئة
                     if (!channelsByCategory[currentChannel.category]) {
                         channelsByCategory[currentChannel.category] = [];
                     }
@@ -148,12 +119,12 @@
                 }
             });
 
-            return channelsByCategory; // إرجاع القنوات مصنفة حسب الفئة
+            return channelsByCategory;
         }
 
         function updateCategorySelect() {
             const categorySelect = document.getElementById('categorySelect');
-            categorySelect.innerHTML = '<option value="">اختر فئة</option>'; // إعادة تعيين الخيارات
+            categorySelect.innerHTML = '<option value="">اختر فئة</option>';
 
             for (const category in channels) {
                 const option = document.createElement('option');
@@ -179,7 +150,6 @@
             fetch(url, { method: 'HEAD' })
                 .then(response => {
                     if (response.ok) {
-                        // إذا كانت القناة شغالة، أضفها إلى القائمة
                         const listItem = document.createElement('div');
                         listItem.className = 'channel-item';
                         listItem.textContent = channel.name;
@@ -201,16 +171,16 @@
             playButton.textContent = 'تشغيل';
             playButton.className = 'bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded-lg';
             playButton.onclick = (e) => {
-                e.stopPropagation(); // لمنع تنفيذ onclick للقناة
+                e.stopPropagation();
                 playChannel(url);
             };
-            playButton.setAttribute('data-url', url); // تخزين الرابط في الزر
+            playButton.setAttribute('data-url', url);
             return playButton;
         }
 
         function playChannel(url, name) {
             if (hls) {
-                hls.destroy(); // تدمير المشغل السابق إذا كان موجودًا
+                hls.destroy();
             }
 
             const selectedQuality = document.getElementById('qualitySelect').value;
@@ -222,30 +192,21 @@
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     const availableLevels = hls.levels.map(level => level.height);
                     const targetLevel = availableLevels.includes(parseInt(selectedQuality)) ? parseInt(selectedQuality) : (availableLevels.includes(480) ? 480 : availableLevels[0]);
-                    hls.currentLevel = availableLevels.indexOf(targetLevel); // ضبط المستوى الحالي
+                    hls.currentLevel = availableLevels.indexOf(targetLevel);
 
                     videoPlayer.play().then(() => {
-                        // الدخول في وضع ملء الشاشة
                         if (videoPlayer.requestFullscreen) {
                             videoPlayer.requestFullscreen();
-                        } else if (videoPlayer.mozRequestFullScreen) { // Firefox
+                        } else if (videoPlayer.mozRequestFullScreen) {
                             videoPlayer.mozRequestFullScreen();
-                        } else if (videoPlayer.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+                        } else if (videoPlayer.webkitRequestFullscreen) {
                             videoPlayer.webkitRequestFullscreen();
-                        } else if (videoPlayer.msRequestFullscreen) { // IE/Edge
+                        } else if (videoPlayer.msRequestFullscreen) {
                             videoPlayer.msRequestFullscreen();
                         }
                     }).catch(error => {
                         console.error('خطأ في التشغيل التلقائي:', error);
                         alert('فشل في التشغيل التلقائي. محاولة تشغيل الدقة الأقل.');
-
-                        // محاولة ضبط دقة أقل
-                        if (targetLevel === 1080 && availableLevels.includes(720)) {
-                            hls.currentLevel = availableLevels.indexOf(720);
-                            videoPlayer.play().catch(error => {
-                                console.error('فشل تشغيل الدقة الأقل:', error);
-                            });
-                        }
                     });
                 });
                 hls.on(Hls.Events.ERROR, function(event, data) {
@@ -268,19 +229,17 @@
                 videoPlayer.src = url;
                 videoPlayer.addEventListener('loadedmetadata', function() {
                     videoPlayer.play().then(() => {
-                        // الدخول في وضع ملء الشاشة
                         if (videoPlayer.requestFullscreen) {
                             videoPlayer.requestFullscreen();
-                        } else if (videoPlayer.mozRequestFullScreen) { // Firefox
+                        } else if (videoPlayer.mozRequestFullScreen) {
                             videoPlayer.mozRequestFullScreen();
-                        } else if (videoPlayer.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+                        } else if (videoPlayer.webkitRequestFullscreen) {
                             videoPlayer.webkitRequestFullscreen();
-                        } else if (videoPlayer.msRequestFullscreen) { // IE/Edge
+                        } else if (videoPlayer.msRequestFullscreen) {
                             videoPlayer.msRequestFullscreen();
                         }
                     }).catch(error => {
                         console.error('خطأ في التشغيل التلقائي:', error);
-                        alert('فشل في التشغيل التلقائي. حاول تشغيل الدقة الأقل.');
                     });
                 });
             }
@@ -316,7 +275,6 @@
             }
         }
 
-        // وظيفة للتحقق من حالة القنوات بشكل دوري
         function checkChannelsPeriodically() {
             const channelListElement = document.getElementById('channelList');
             const channelsToCheck = Array.from(channelListElement.children);
@@ -328,7 +286,6 @@
             });
         }
 
-        // بدء التحقق الدوري كل 10 دقائق
         checkInterval = setInterval(checkChannelsPeriodically, 600000); // كل 10 دقائق
     </script>
 </body>
