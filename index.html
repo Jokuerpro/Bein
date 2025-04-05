@@ -43,10 +43,16 @@
     <div class="container">
         <h2 class="text-3xl font-bold mb-6 text-center">موقع IPTV احترافي</h2>
         
-        <!-- إدخال رابط M3U -->
+        <!-- إدخال رابط ملف M3U -->
         <div class="mb-4">
             <label for="urlInput" class="block">إدخال رابط ملف M3U:</label>
             <input type="text" id="urlInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط ملف M3U" />
+        </div>
+
+        <!-- إدخال رابط Xtream IPTV -->
+        <div class="mb-4">
+            <label for="xtreamInput" class="block">إدخال رابط Xtream IPTV:</label>
+            <input type="text" id="xtreamInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط Xtream IPTV" />
         </div>
 
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="loadM3U()">تحميل</button>
@@ -88,6 +94,7 @@
 
         function loadM3U() {
             const url = document.getElementById('urlInput').value;
+            const xtreamUrl = document.getElementById('xtreamInput').value;
 
             if (url) {
                 fetch(url)
@@ -95,14 +102,27 @@
                     .then(data => {
                         channels = parseM3U(data); // تحليل البيانات
                         updateCategorySelect();
-                        notifyUser('تم تحميل القنوات بنجاح!'); // إشعار عند التحميل
+                        notifyUser('تم تحميل القنوات من ملف M3U بنجاح!'); // إشعار عند التحميل
                     })
                     .catch(error => {
-                        console.error('خطأ في تحميل الملف:', error);
-                        alert('فشل في تحميل الملف. تحقق من الرابط.');
+                        console.error('خطأ في تحميل ملف M3U:', error);
+                        alert('فشل في تحميل ملف M3U. تحقق من الرابط.');
+                    });
+            } else if (xtreamUrl) {
+                // هنا يمكنك إضافة منطق لتحميل القنوات من رابط Xtream إذا كان لديك منطق خاص لذلك
+                fetch(xtreamUrl)
+                    .then(response => response.text())
+                    .then(data => {
+                        channels = parseM3U(data); // تحليل البيانات
+                        updateCategorySelect();
+                        notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!'); // إشعار عند التحميل
+                    })
+                    .catch(error => {
+                        console.error('خطأ في تحميل رابط Xtream IPTV:', error);
+                        alert('فشل في تحميل رابط Xtream IPTV. تحقق من الرابط.');
                     });
             } else {
-                alert('يرجى إدخال رابط ملف M3U.'); // رسالة تنبيه في حالة عدم وجود رابط
+                alert('يرجى إدخال رابط ملف M3U أو رابط Xtream IPTV.'); // رسالة تنبيه في حالة عدم وجود رابط
             }
         }
 
