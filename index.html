@@ -30,6 +30,17 @@
         .channel-item:hover {
             background-color: #3B82F6; /* لون الخلفية عند التحويم */
         }
+        body {
+            transition: background-color 0.5s;
+        }
+        .light-theme {
+            background-color: #f9f9f9;
+            color: #000;
+        }
+        .dark-theme {
+            background-color: #1a202c;
+            color: #fff;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -64,6 +75,9 @@
             <video id="videoPlayer" class="video-js vjs-default-skin w-full" controls preload="auto" width="640" height="360"></video>
             <div class="notification bg-blue-800 text-center p-2 rounded mt-2" id="notification"></div>
         </div>
+
+        <!-- زر لتغيير السمة -->
+        <button id="themeToggle" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded">تغيير السمة</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
@@ -72,6 +86,8 @@
         let channels = {};
         let videoPlayer = document.getElementById('videoPlayer');
         let hls;
+        let checkInterval;
+        let isDarkTheme = true; // الحالة الأولية
 
         // حفظ الرابط في التخزين المحلي
         const savedUrl = localStorage.getItem('savedUrl');
@@ -89,6 +105,7 @@
                     .then(data => {
                         channels = parseM3U(data); // تحليل البيانات
                         updateCategorySelect();
+                        notifyUser('تم تحميل القنوات بنجاح!'); // إشعار عند التحميل
                     })
                     .catch(error => {
                         console.error('خطأ في تحميل الملف:', error);
@@ -174,6 +191,7 @@
                 e.stopPropagation(); // لمنع تنفيذ onclick للقناة
                 playChannel(url);
             };
+            playButton.setAttribute('data-url', url); // تخزين الرابط في الزر
             return playButton;
         }
 
@@ -272,6 +290,41 @@
                 });
             }
         }
+
+        function notifyUser(message) {
+            if (Notification.permission === 'granted') {
+                new Notification('إشعار IPTV', { body: message });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('إشعار IPTV', { body: message });
+                    }
+                });
+            }
+        }
+
+        // وظيفة للتحقق من حالة القنوات بشكل دوري
+        function checkChannelsPeriodically() {
+            const channelListElement = document.getElementById('channelList');
+            const channelsToCheck = Array.from(channelListElement.children);
+
+            channelsToCheck.forEach(channelItem => {
+                const channelName = channelItem.textContent;
+                const channelUrl = channelItem.querySelector('button').getAttribute('data-url');
+                checkChannel(channelUrl, { name: channelName }, channelListElement);
+            });
+        }
+
+        // بدء التحقق الدوري كل 10 دقائق
+        checkInterval = setInterval(checkChannelsPeriodically, 600000); // كل 10 دقائق
+
+        // تغيير السمة
+        document.getElementById('themeToggle').onclick = function() {
+            document.body.classList.toggle('light-theme');
+            document.body.classList.toggle('dark-theme');
+            isDarkTheme = !isDarkTheme;
+            this.textContent = isDarkTheme ? 'تغيير إلى الوضع الفاتح' : 'تغيير إلى الوضع الداكن';
+        };
     </script>
 </body>
 </html>
