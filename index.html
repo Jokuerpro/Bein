@@ -108,12 +108,13 @@
                         console.error('خطأ في تحميل ملف M3U:', error);
                         alert('فشل في تحميل ملف M3U. تحقق من الرابط.');
                     });
-            } else if (xtreamUrl) {
-                // هنا يمكنك إضافة منطق لتحميل القنوات من رابط Xtream إذا كان لديك منطق خاص لذلك
+            } 
+            
+            if (xtreamUrl) {
                 fetch(xtreamUrl)
                     .then(response => response.text())
                     .then(data => {
-                        channels = parseM3U(data); // تحليل البيانات
+                        channels = parseM3U(data); // يجب أن يكون لديك منطق لتحليل البيانات هنا
                         updateCategorySelect();
                         notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!'); // إشعار عند التحميل
                     })
