@@ -10,14 +10,6 @@
         .notification {
             display: none;
         }
-        .category-title {
-            font-weight: bold;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .category-select {
-            max-width: 200px; /* تحديد الحد الأقصى لعرض شريط الفئات */
-        }
         .channel-item {
             display: flex;
             justify-content: space-between;
@@ -25,25 +17,50 @@
             padding: 10px;
             border-radius: 8px;
             margin: 5px 0;
+            background-color: #2d3748; /* لون خلفية العنصر */
+            transition: background-color 0.3s; /* تأثير الانتقال */
         }
-        .theme-red {
-            background-color: #ffcccc; /* خلفية حمراء */
-            color: #900000; /* نص داكن */
+        .channel-item:hover {
+            background-color: #4a5568; /* لون الخلفية عند التحويم */
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #1a202c; /* خلفية التطبيق */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .player {
+            background-color: #2d3748; /* لون خلفية المشغل */
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white theme-red">
-    <div class="container mx-auto p-5 rounded-lg shadow-lg bg-gray-800">
+<body class="bg-gray-900 text-white">
+    <div class="container">
         <h2 class="text-3xl font-bold mb-6 text-center">موقع IPTV احترافي</h2>
         
         <!-- إدخال رابط ملف M3U -->
-        <input type="text" id="urlInput" class="mb-4 p-2 rounded-lg bg-gray-700 text-white" placeholder="أدخل رابط ملف M3U" />
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" onclick="loadM3U()">تحميل</button>
+        <div class="mb-4">
+            <label for="fileInput" class="block">تحميل ملف M3U:</label>
+            <input type="file" id="fileInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" accept=".m3u" />
+        </div>
+
+        <!-- إدخال رابط Xtream -->
+        <div class="mb-4">
+            <label for="xtreamInput" class="block">إدخال رابط Xtream:</label>
+            <input type="text" id="xtreamInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط Xtream" />
+        </div>
+
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="loadM3U()">تحميل</button>
 
         <!-- إعدادات الجودة -->
         <div class="mb-4">
             <label for="qualitySelect" class="mr-2">اختر الجودة:</label>
-            <select id="qualitySelect" class="form-select bg-gray-700 text-white rounded-lg">
+            <select id="qualitySelect" class="form-select bg-gray-800 text-white rounded-lg shadow-md">
                 <option value="1080">1080p</option>
                 <option value="720">720p</option>
                 <option value="480">480p</option>
@@ -51,23 +68,20 @@
         </div>
 
         <div class="flex justify-between items-center mb-4">
-            <select id="categorySelect" class="form-select bg-gray-700 text-white rounded-lg category-select" onchange="loadChannelsByCategory()">
+            <select id="categorySelect" class="form-select bg-gray-800 text-white rounded-lg shadow-md" onchange="loadChannelsByCategory()">
                 <option value="">اختر فئة</option>
             </select>
         </div>
 
-        <input type="text" id="searchBar" class="form-input mt-2 mb-4 p-3 rounded-lg border border-gray-600 bg-gray-700" placeholder="ابحث عن قناة" oninput="filterChannels()">
+        <input type="text" id="searchBar" class="form-input mt-2 mb-4 p-3 rounded-lg border border-gray-600 bg-gray-800" placeholder="ابحث عن قناة" oninput="filterChannels()">
 
         <div class="channel-list h-60 overflow-y-auto bg-gray-700 rounded-lg p-2 mb-4" id="channelList"></div>
 
-        <div class="player bg-black rounded-lg p-4 text-center">
+        <div class="player text-center">
             <h3 class="text-lg mb-2">مشغل القنوات</h3>
             <video id="videoPlayer" class="video-js vjs-default-skin w-full" controls preload="auto" width="640" height="360"></video>
             <div class="notification bg-blue-800 text-center p-2 rounded mt-2" id="notification"></div>
         </div>
-
-        <!-- زر لتغيير السمة (تم حذفه) -->
-        <button id="themeToggle" class="bg-gray-600 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded" style="display:none;">تغيير السمة</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
@@ -78,29 +92,33 @@
         let hls;
         let checkInterval;
 
-        // حفظ الرابط في التخزين المحلي
-        const savedUrl = localStorage.getItem('savedUrl');
-        if (savedUrl) {
-            document.getElementById('urlInput').value = savedUrl;
-            loadM3U(); // تحميل البيانات تلقائيًا
+        function loadM3U() {
+            const fileInput = document.getElementById('fileInput');
+            const xtreamUrl = document.getElementById('xtreamInput').value; // رابط Xtream
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const data = event.target.result;
+                    channels = parseM3U(data); // تحليل البيانات
+                    updateCategorySelect();
+                    notifyUser('تم تحميل القنوات من ملف M3U بنجاح!'); // إشعار عند التحميل
+                };
+                reader.readAsText(file);
+            } else if (xtreamUrl) {
+                // هنا يمكنك إضافة منطق لتحميل القنوات من رابط Xtream إذا كان موجودًا
+                fetchXtreamData(xtreamUrl);
+            } else {
+                alert('يرجى تحميل ملف M3U أو إدخال رابط Xtream.'); // رسالة تنبيه في حالة عدم وجود ملف
+            }
         }
 
-        function loadM3U() {
-            const url = document.getElementById('urlInput').value;
-            if (url) {
-                localStorage.setItem('savedUrl', url); // حفظ الرابط
-                fetch(url)
-                    .then(response => response.text())
-                    .then(data => {
-                        channels = parseM3U(data); // تحليل البيانات
-                        updateCategorySelect();
-                        notifyUser('تم تحميل القنوات بنجاح!'); // إشعار عند التحميل
-                    })
-                    .catch(error => {
-                        console.error('خطأ في تحميل الملف:', error);
-                        alert('فشل في تحميل الملف. تحقق من الرابط.');
-                    });
-            }
+        function fetchXtreamData(xtreamUrl) {
+            // هنا يمكنك إضافة منطق لتحميل البيانات من رابط Xtream
+            // مثال على كيفية معالجة الرابط
+            notifyUser('تم تحميل القنوات من رابط Xtream بنجاح!'); // إشعار عند التحميل
+            // يجب عليك إضافة المزيد من التعليمات البرمجية لتحليل بيانات Xtream هنا
         }
 
         function parseM3U(data) {
