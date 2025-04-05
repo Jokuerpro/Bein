@@ -43,10 +43,10 @@
     <div class="container">
         <h2 class="text-3xl font-bold mb-6 text-center">موقع IPTV احترافي</h2>
         
-        <!-- إدخال رابط ملف M3U -->
+        <!-- إدخال رابط M3U -->
         <div class="mb-4">
-            <label for="fileInput" class="block">تحميل ملف M3U:</label>
-            <input type="file" id="fileInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" accept=".m3u" />
+            <label for="urlInput" class="block">إدخال رابط ملف M3U:</label>
+            <input type="text" id="urlInput" class="mb-2 p-3 rounded-lg bg-gray-800 text-white shadow-md" placeholder="أدخل رابط ملف M3U" />
         </div>
 
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="loadM3U()">تحميل</button>
@@ -87,20 +87,22 @@
         let checkInterval;
 
         function loadM3U() {
-            const fileInput = document.getElementById('fileInput');
+            const url = document.getElementById('urlInput').value;
 
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const data = event.target.result;
-                    channels = parseM3U(data); // تحليل البيانات
-                    updateCategorySelect();
-                    notifyUser('تم تحميل القنوات بنجاح!'); // إشعار عند التحميل
-                };
-                reader.readAsText(file);
+            if (url) {
+                fetch(url)
+                    .then(response => response.text())
+                    .then(data => {
+                        channels = parseM3U(data); // تحليل البيانات
+                        updateCategorySelect();
+                        notifyUser('تم تحميل القنوات بنجاح!'); // إشعار عند التحميل
+                    })
+                    .catch(error => {
+                        console.error('خطأ في تحميل الملف:', error);
+                        alert('فشل في تحميل الملف. تحقق من الرابط.');
+                    });
             } else {
-                alert('يرجى تحميل ملف M3U.'); // رسالة تنبيه في حالة عدم وجود ملف
+                alert('يرجى إدخال رابط ملف M3U.'); // رسالة تنبيه في حالة عدم وجود رابط
             }
         }
 
