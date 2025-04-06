@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل IPTV متقدم</title>
+    <title>مشغل Xtream IPTV كامل</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -71,7 +71,6 @@
             color: var(--primary);
         }
 
-        /* نظام البطاقات */
         .card {
             background-color: var(--card);
             border-radius: 8px;
@@ -80,7 +79,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* المشغل */
         .player-container {
             position: relative;
             width: 100%;
@@ -105,7 +103,6 @@
             color: white;
         }
 
-        /* القنوات */
         .channels-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -140,7 +137,6 @@
             padding: 10px;
         }
 
-        /* نظام التبويبات */
         .tabs {
             display: flex;
             border-bottom: 1px solid var(--gray);
@@ -158,7 +154,6 @@
             color: var(--primary);
         }
 
-        /* الرسائل */
         .alert {
             padding: 10px 15px;
             border-radius: 4px;
@@ -176,7 +171,6 @@
             color: var(--success);
         }
 
-        /* التحميل */
         .spinner {
             width: 40px;
             height: 40px;
@@ -192,11 +186,31 @@
             to { transform: rotate(360deg); }
         }
 
-        /* للجوال */
         @media (max-width: 768px) {
             .channels-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
+        }
+
+        #login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
         }
     </style>
 </head>
@@ -204,7 +218,7 @@
     <div class="container">
         <header>
             <div class="logo">
-                <i class="fas fa-tv"></i> مشغل IPTV
+                <i class="fas fa-tv"></i> مشغل Xtream IPTV
             </div>
             <button class="btn btn-primary" id="login-btn">
                 <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
@@ -235,9 +249,8 @@
         </div>
     </div>
 
-    <!-- نافذة تسجيل الدخول -->
-    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: var(--card); padding: 25px; border-radius: 8px; width: 90%; max-width: 400px;">
+    <div id="login-modal">
+        <div class="modal-content">
             <h2 style="margin-bottom: 20px; color: var(--primary); text-align: center;">
                 <i class="fas fa-user-circle"></i> بيانات الاتصال
             </h2>
@@ -266,13 +279,9 @@
         </div>
     </div>
 
-    <!-- المكتبات المطلوبة -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // العناصر الرئيسية
             const videoPlayer = document.getElementById('video-player');
             const loginBtn = document.getElementById('login-btn');
             const loginModal = document.getElementById('login-modal');
@@ -281,54 +290,93 @@
             const nowPlaying = document.getElementById('now-playing');
             const alertMessage = document.getElementById('alert-message');
             
-            // حالة التطبيق
             let hls = null;
             let currentServer = null;
             let currentCategory = 'live';
             
-            // أحداث التسجيل
-            loginBtn.addEventListener('click', showLoginModal);
-            loginForm.addEventListener('submit', handleLogin);
-            
-            // أحداث التبويبات
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    currentCategory = this.dataset.tab;
-                    loadChannels(currentCategory);
-                });
-            });
-            
-            // عرض نافذة التسجيل
-            function showLoginModal() {
-                loginModal.style.display = 'flex';
-                document.getElementById('login-message').style.display = 'none';
+            // 1. حل مشكلة CORS مع عدة بروكسيات
+            async function fetchWithCORS(url) {
+                const proxies = [
+                    '', // محاولة مباشرة أولاً
+                    'https://cors-anywhere.herokuapp.com/',
+                    'https://api.codetabs.com/v1/proxy/?quest=',
+                    'https://thingproxy.freeboard.io/fetch/'
+                ];
+                
+                let lastError;
+                
+                for (const proxy of proxies) {
+                    try {
+                        const proxyUrl = proxy + url;
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000);
+                        
+                        const response = await fetch(proxyUrl, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        if (response.ok) return response;
+                        throw new Error(`Status ${response.status}`);
+                        
+                    } catch (error) {
+                        lastError = error;
+                        console.log(`فشلت المحاولة مع ${proxy}:`, error);
+                    }
+                }
+                
+                throw lastError || new Error('فشل جميع محاولات الاتصال');
             }
             
-            // معالجة تسجيل الدخول
+            // 2. التحقق من صحة رابط السيرفر
+            function validateServerUrl(url) {
+                try {
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'http://' + url;
+                    }
+                    
+                    url = url.trim();
+                    
+                    if (!url.includes('://')) {
+                        throw new Error('رابط السيرفر غير صالح');
+                    }
+                    
+                    // إزالة أي مسار إضافي
+                    url = url.split('/')[0] + '//' + url.split('/')[2];
+                    
+                    return url;
+                } catch (e) {
+                    throw new Error('الرجاء إدخال رابط سيرفر صحيح');
+                }
+            }
+            
+            // 3. معالجة تسجيل الدخول مع التحسينات
             async function handleLogin(e) {
                 e.preventDefault();
                 
-                const server = document.getElementById('server-url').value.trim();
-                const username = document.getElementById('username').value.trim();
-                const password = document.getElementById('password').value.trim();
-                
-                if (!server || !username || !password) {
-                    showLoginMessage('الرجاء تعبئة جميع الحقول', 'error');
-                    return;
-                }
+                const server = document.getElementById('server-url').value;
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
                 
                 try {
-                    showSpinner('login-spinner', true);
-                    showLoginMessage('جاري الاتصال بالسيرفر...', 'info');
+                    if (!server || !username || !password) {
+                        throw new Error('الرجاء تعبئة جميع الحقول');
+                    }
                     
-                    // اختبار الاتصال
-                    const apiUrl = `${server}/player_api.php?username=${username}&password=${password}`;
+                    const validatedUrl = validateServerUrl(server);
+                    const apiUrl = `${validatedUrl}/player_api.php?username=${username}&password=${password}`;
+                    
+                    showSpinner('login-spinner', true);
+                    showLoginMessage('جاري الاتصال...', 'info');
+                    
                     const response = await fetchWithCORS(apiUrl);
                     
                     if (!response.ok) {
-                        throw new Error('فشل الاتصال بالسيرفر');
+                        throw new Error(`خطأ في السيرفر: ${response.status}`);
                     }
                     
                     const data = await response.json();
@@ -337,32 +385,28 @@
                         throw new Error('بيانات الدخول غير صحيحة أو الاشتراك منتهي');
                     }
                     
-                    // حفظ بيانات الاتصال
                     currentServer = {
-                        url: server,
+                        url: validatedUrl,
                         username,
                         password,
                         userInfo: data.user_info
                     };
                     
-                    // إغلاق النافذة
-                    loginModal.style.display = 'none';
-                    
-                    // تحميل القنوات
-                    loadChannels(currentCategory);
-                    
-                    showLoginMessage('تم الاتصال بنجاح', 'success');
-                    setTimeout(() => showLoginMessage('', ''), 2000);
+                    showLoginMessage('تم الاتصال بنجاح!', 'success');
+                    setTimeout(() => {
+                        loginModal.style.display = 'none';
+                        loadChannels(currentCategory);
+                    }, 1500);
                     
                 } catch (error) {
                     console.error('Login error:', error);
-                    showLoginMessage(error.message || 'فشل الاتصال', 'error');
+                    showLoginMessage(error.message || 'فشل الاتصال بالسيرفر', 'error');
                 } finally {
                     showSpinner('login-spinner', false);
                 }
             }
             
-            // تحميل القنوات
+            // 4. تحميل القنوات مع معالجة الأخطاء
             async function loadChannels(category) {
                 if (!currentServer) return;
                 
@@ -401,13 +445,12 @@
                 }
             }
             
-            // عرض القنوات
+            // 5. عرض القنوات
             function renderChannels(channels) {
                 channels.forEach(channel => {
                     const channelCard = document.createElement('div');
                     channelCard.className = 'channel-card';
                     
-                    // إنشاء رابط التشغيل
                     const streamUrl = `${currentServer.url}/live/${currentServer.username}/${currentServer.password}/${channel.stream_id}.ts`;
                     
                     channelCard.innerHTML = `
@@ -429,9 +472,8 @@
                 });
             }
             
-            // تشغيل القناة
+            // 6. تشغيل القناة مع دعم HLS و TS
             function playStream(url, channelName) {
-                // تنظيف المشغل السابق
                 if (hls) {
                     hls.destroy();
                     hls = null;
@@ -439,13 +481,9 @@
                 
                 videoPlayer.pause();
                 videoPlayer.src = '';
-                
-                // تحديث الواجهة
                 nowPlaying.textContent = channelName;
                 
-                // محاولة التشغيل بتقنيات مختلفة
                 if (url.includes('.m3u8')) {
-                    // HLS Stream
                     if (Hls.isSupported()) {
                         hls = new Hls({
                             maxBufferLength: 30,
@@ -461,7 +499,6 @@
                             });
                         });
                     } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                        // Safari native HLS
                         videoPlayer.src = url;
                         videoPlayer.play().catch(e => {
                             showAlert('تعذر تشغيل القناة', 'error');
@@ -470,34 +507,10 @@
                         showAlert('المتصفح لا يدعم تشغيل هذا النوع من القنوات', 'error');
                     }
                 } else {
-                    // TS Stream
                     videoPlayer.src = url;
                     videoPlayer.play().catch(e => {
                         showAlert('تعذر تشغيل القناة', 'error');
                     });
-                }
-            }
-            
-            // حل مشكلة CORS لـ GitHub Pages
-            async function fetchWithCORS(url) {
-                try {
-                    // المحاولة الأولى مباشرة
-                    const directResponse = await fetch(url);
-                    if (directResponse.ok) return directResponse;
-                    
-                    // المحاولة الثانية مع CORS Anywhere
-                    const corsUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-                    const corsResponse = await fetch(corsUrl, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    
-                    if (!corsResponse.ok) throw new Error('فشل تحميل البيانات');
-                    return corsResponse;
-                    
-                } catch (error) {
-                    throw error;
                 }
             }
             
@@ -523,6 +536,30 @@
                 loginMsg.style.color = type === 'error' ? 'var(--error)' : 
                                       type === 'success' ? 'var(--success)' : 'white';
             }
+            
+            // أحداث
+            loginBtn.addEventListener('click', () => {
+                loginModal.style.display = 'flex';
+                document.getElementById('login-message').style.display = 'none';
+            });
+            
+            loginForm.addEventListener('submit', handleLogin);
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.tab;
+                    loadChannels(currentCategory);
+                });
+            });
+            
+            // إغلاق النافذة عند النقر خارجها
+            loginModal.addEventListener('click', (e) => {
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>
