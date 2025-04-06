@@ -1,41 +1,38 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشغل Xtream IPTV كامل</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Xtream IPTV Player</title>
     <style>
         :root {
-            --primary: #FF5722;
+            --primary: #ff6b00;
             --dark: #121212;
-            --darker: #0A0A0A;
-            --light: #F5F5F5;
+            --darker: #0a0a0a;
+            --light: #f5f5f5;
             --gray: #333;
-            --card: #1E1E1E;
-            --error: #FF4444;
-            --success: #4CAF50;
+            --card: #1e1e1e;
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Tajawal', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            background-color: var(--dark);
+            background: var(--dark);
             color: var(--light);
             min-height: 100vh;
         }
-
+        
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 20px;
         }
-
+        
         header {
             display: flex;
             justify-content: space-between;
@@ -44,13 +41,36 @@
             border-bottom: 1px solid var(--gray);
             margin-bottom: 20px;
         }
-
+        
         .logo {
             font-size: 24px;
             font-weight: bold;
             color: var(--primary);
         }
-
+        
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
         .btn {
             padding: 8px 16px;
             border-radius: 4px;
@@ -59,508 +79,508 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
+        
         .btn-primary {
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
         }
-
+        
         .btn-outline {
             background: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
         }
-
-        .card {
-            background-color: var(--card);
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* Main Content */
+        .dashboard {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+        
+        .panel {
+            background: var(--card);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-
+        
+        .category-list {
+            list-style: none;
+        }
+        
+        .category-item {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-item:hover {
+            background: var(--gray);
+        }
+        
+        .category-item.active {
+            background: var(--primary);
+            font-weight: 500;
+        }
+        
+        .content-area {
+            flex: 1;
+        }
+        
         .player-container {
-            position: relative;
+            background: var(--card);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .video-container {
             width: 100%;
             aspect-ratio: 16/9;
-            background-color: black;
-            border-radius: 8px;
+            background: black;
+            border-radius: 4px;
             overflow: hidden;
+            margin-bottom: 15px;
         }
-
-        #video-player {
+        
+        #iptv-player {
             width: 100%;
             height: 100%;
         }
-
-        .player-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 10px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
-            color: white;
+        
+        .channel-list-container {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 15px;
         }
-
-        .channels-grid {
+        
+        .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px;
-            margin-top: 20px;
         }
-
+        
         .channel-card {
-            background-color: var(--darker);
+            background: var(--darker);
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
             transition: all 0.2s;
         }
-
+        
         .channel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-
+        
+        .channel-card.active {
+            border: 2px solid var(--primary);
+        }
+        
         .channel-logo {
             width: 100%;
             height: 100px;
-            background-color: var(--gray);
+            background: var(--gray);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 30px;
         }
-
-        .channel-info {
-            padding: 10px;
-        }
-
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--gray);
-            margin-bottom: 15px;
-        }
-
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-            border-bottom: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .alert {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin: 10px 0;
-            display: none;
-        }
-
-        .alert-error {
-            background-color: rgba(255,68,68,0.2);
-            color: var(--error);
-        }
-
-        .alert-success {
-            background-color: rgba(76,175,80,0.2);
-            color: var(--success);
-        }
-
+        
+        /* Loading States */
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid rgba(255,255,255,0.1);
+            margin: 20px auto;
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             border-top-color: var(--primary);
             animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
         }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        @media (max-width: 768px) {
-            .channels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard {
+                flex-direction: column;
             }
-        }
-
-        #login-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
+            
+            .sidebar {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                <i class="fas fa-tv"></i> مشغل Xtream IPTV
+            <div class="logo">XTREAM IPTV</div>
+            <div class="user-area">
+                <button class="btn btn-primary" id="login-btn">Enter Credentials</button>
             </div>
-            <button class="btn btn-primary" id="login-btn">
-                <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-            </button>
         </header>
-
-        <div class="card">
-            <div class="player-container">
-                <video id="video-player" controls></video>
-                <div class="player-overlay">
-                    <div id="now-playing">لا يوجد قناة مشغلة حالياً</div>
+        
+        <div class="dashboard">
+            <div class="sidebar">
+                <div class="panel">
+                    <h3>CATEGORIES</h3>
+                    <ul class="category-list" id="category-list">
+                        <!-- Categories will be loaded here -->
+                    </ul>
                 </div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="tabs">
-                <div class="tab active" data-tab="live">قنوات مباشرة</div>
-                <div class="tab" data-tab="movies">أفلام</div>
-                <div class="tab" data-tab="series">مسلسلات</div>
-            </div>
-
-            <div id="tab-content">
-                <div class="spinner" id="channels-spinner"></div>
-                <div class="alert" id="alert-message"></div>
-                <div class="channels-grid" id="channels-container"></div>
+            
+            <div class="content-area">
+                <div class="player-container">
+                    <div class="video-container">
+                        <video id="iptv-player" controls></video>
+                    </div>
+                </div>
+                
+                <div class="channel-list-container">
+                    <div class="channel-grid" id="channel-grid">
+                        <!-- Channels will be loaded here -->
+                    </div>
+                    <div class="spinner" id="channel-spinner"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="login-modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 20px; color: var(--primary); text-align: center;">
-                <i class="fas fa-user-circle"></i> بيانات الاتصال
-            </h2>
+    <!-- Login Modal -->
+    <div id="login-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: var(--card); padding: 30px; border-radius: 8px; width: 90%; max-width: 500px;">
+            <h2 style="margin-bottom: 20px; color: var(--primary);">Enter Xtream Codes Credentials</h2>
             <form id="login-form">
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px;">رابط السيرفر</label>
-                    <input type="url" id="server-url" style="width: 100%; padding: 10px; background: var(--darker); border: 1px solid var(--gray); border-radius: 4px; color: white;" 
-                           placeholder="http://example.com:8080" required>
+                    <label style="display: block; margin-bottom: 5px;">Server URL</label>
+                    <input type="text" id="server-url" style="width: 100%; padding: 10px; background: var(--darker); border: 1px solid var(--gray); border-radius: 4px; color: white;" 
+                           placeholder="http://your.server.com:8080" required>
                 </div>
                 <div style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px;">اسم المستخدم</label>
+                    <label style="display: block; margin-bottom: 5px;">Username</label>
                     <input type="text" id="username" style="width: 100%; padding: 10px; background: var(--darker); border: 1px solid var(--gray); border-radius: 4px; color: white;" 
-                           placeholder="اسم المستخدم" required>
+                           placeholder="Your username" required>
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px;">كلمة المرور</label>
+                    <label style="display: block; margin-bottom: 5px;">Password</label>
                     <input type="password" id="password" style="width: 100%; padding: 10px; background: var(--darker); border: 1px solid var(--gray); border-radius: 4px; color: white;" 
-                           placeholder="كلمة المرور" required>
+                           placeholder="Your password" required>
                 </div>
-                <button type="submit" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    <i class="fas fa-plug"></i> الاتصال
-                </button>
+                <button type="submit" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">Connect</button>
             </form>
-            <div class="spinner" id="login-spinner" style="margin: 15px auto;"></div>
-            <div id="login-message" style="margin-top: 15px; padding: 10px; border-radius: 4px; text-align: center; display: none;"></div>
+            <div id="login-message" style="margin-top: 15px; color: #ff4444;"></div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js"></script>
     <script>
+        // Main application
         document.addEventListener('DOMContentLoaded', function() {
-            const videoPlayer = document.getElementById('video-player');
+            // DOM elements
             const loginBtn = document.getElementById('login-btn');
             const loginModal = document.getElementById('login-modal');
             const loginForm = document.getElementById('login-form');
-            const channelsContainer = document.getElementById('channels-container');
-            const nowPlaying = document.getElementById('now-playing');
-            const alertMessage = document.getElementById('alert-message');
+            const loginMessage = document.getElementById('login-message');
+            const player = document.getElementById('iptv-player');
+            const categoryList = document.getElementById('category-list');
+            const channelGrid = document.getElementById('channel-grid');
+            const channelSpinner = document.getElementById('channel-spinner');
             
+            // App state
+            let credentials = null;
+            let categories = [];
+            let channels = [];
+            
+            // Initialize HLS.js if needed
             let hls = null;
-            let currentServer = null;
-            let currentCategory = 'live';
             
-            // 1. حل مشكلة CORS مع عدة بروكسيات
-            async function fetchWithCORS(url) {
-                const proxies = [
-                    '', // محاولة مباشرة أولاً
-                    'https://cors-anywhere.herokuapp.com/',
-                    'https://api.codetabs.com/v1/proxy/?quest=',
-                    'https://thingproxy.freeboard.io/fetch/'
-                ];
-                
-                let lastError;
-                
-                for (const proxy of proxies) {
-                    try {
-                        const proxyUrl = proxy + url;
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000);
-                        
-                        const response = await fetch(proxyUrl, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            signal: controller.signal
-                        });
-                        
-                        clearTimeout(timeoutId);
-                        
-                        if (response.ok) return response;
-                        throw new Error(`Status ${response.status}`);
-                        
-                    } catch (error) {
-                        lastError = error;
-                        console.log(`فشلت المحاولة مع ${proxy}:`, error);
-                    }
-                }
-                
-                throw lastError || new Error('فشل جميع محاولات الاتصال');
-            }
+            // Event listeners
+            loginBtn.addEventListener('click', function() {
+                loginModal.style.display = 'flex';
+            });
             
-            // 2. التحقق من صحة رابط السيرفر
-            function validateServerUrl(url) {
-                try {
-                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        url = 'http://' + url;
-                    }
-                    
-                    url = url.trim();
-                    
-                    if (!url.includes('://')) {
-                        throw new Error('رابط السيرفر غير صالح');
-                    }
-                    
-                    // إزالة أي مسار إضافي
-                    url = url.split('/')[0] + '//' + url.split('/')[2];
-                    
-                    return url;
-                } catch (e) {
-                    throw new Error('الرجاء إدخال رابط سيرفر صحيح');
-                }
-            }
-            
-            // 3. معالجة تسجيل الدخول مع التحسينات
-            async function handleLogin(e) {
+            loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
+                connectToServer();
+            });
+            
+            // Close modal when clicking outside
+            loginModal.addEventListener('click', function(e) {
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+            });
+            
+            // Connect to Xtream server
+            async function connectToServer() {
+                const serverUrl = document.getElementById('server-url').value.trim();
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
                 
-                const server = document.getElementById('server-url').value;
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
+                if (!serverUrl || !username || !password) {
+                    showLoginMessage('Please fill all fields');
+                    return;
+                }
                 
                 try {
-                    if (!server || !username || !password) {
-                        throw new Error('الرجاء تعبئة جميع الحقول');
-                    }
+                    // Validate server URL
+                    const baseUrl = validateServerUrl(serverUrl);
                     
-                    const validatedUrl = validateServerUrl(server);
-                    const apiUrl = `${validatedUrl}/player_api.php?username=${username}&password=${password}`;
-                    
-                    showSpinner('login-spinner', true);
-                    showLoginMessage('جاري الاتصال...', 'info');
-                    
-                    const response = await fetchWithCORS(apiUrl);
+                    // Test connection
+                    const testUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}`;
+                    const response = await fetch(testUrl);
                     
                     if (!response.ok) {
-                        throw new Error(`خطأ في السيرفر: ${response.status}`);
+                        throw new Error('Server connection failed');
                     }
                     
                     const data = await response.json();
                     
                     if (!data.user_info || data.user_info.auth !== 1) {
-                        throw new Error('بيانات الدخول غير صحيحة أو الاشتراك منتهي');
+                        throw new Error('Invalid credentials');
                     }
                     
-                    currentServer = {
-                        url: validatedUrl,
+                    // Save credentials
+                    credentials = {
+                        server: baseUrl,
                         username,
                         password,
                         userInfo: data.user_info
                     };
                     
-                    showLoginMessage('تم الاتصال بنجاح!', 'success');
-                    setTimeout(() => {
-                        loginModal.style.display = 'none';
-                        loadChannels(currentCategory);
-                    }, 1500);
+                    // Hide login modal
+                    loginModal.style.display = 'none';
+                    
+                    // Load categories
+                    loadCategories();
                     
                 } catch (error) {
-                    console.error('Login error:', error);
-                    showLoginMessage(error.message || 'فشل الاتصال بالسيرفر', 'error');
-                } finally {
-                    showSpinner('login-spinner', false);
+                    console.error('Connection error:', error);
+                    showLoginMessage(error.message || 'Connection failed');
                 }
             }
             
-            // 4. تحميل القنوات مع معالجة الأخطاء
-            async function loadChannels(category) {
-                if (!currentServer) return;
-                
-                showSpinner('channels-spinner', true);
-                hideAlert();
-                channelsContainer.innerHTML = '';
+            // Validate server URL
+            function validateServerUrl(url) {
+                try {
+                    // Add protocol if missing
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'http://' + url;
+                    }
+                    
+                    // Remove trailing slash
+                    url = url.replace(/\/$/, '');
+                    
+                    // Basic validation
+                    new URL(url);
+                    
+                    return url;
+                } catch (e) {
+                    throw new Error('Invalid server URL');
+                }
+            }
+            
+            // Show login message
+            function showLoginMessage(message, isError = true) {
+                loginMessage.textContent = message;
+                loginMessage.style.color = isError ? '#ff4444' : '#4CAF50';
+            }
+            
+            // Load categories from Xtream API
+            async function loadCategories() {
+                channelSpinner.style.display = 'block';
+                categoryList.innerHTML = '';
                 
                 try {
-                    let apiUrl;
-                    if (category === 'live') {
-                        apiUrl = `${currentServer.url}/player_api.php?username=${currentServer.username}&password=${currentServer.password}&action=get_live_streams`;
+                    const categoriesUrl = `${credentials.server}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_live_categories`;
+                    
+                    const response = await fetch(categoriesUrl);
+                    if (!response.ok) throw new Error('Failed to load categories');
+                    
+                    categories = await response.json();
+                    
+                    // Add "All Channels" option
+                    categories.unshift({
+                        category_id: 'all',
+                        category_name: 'All Channels'
+                    });
+                    
+                    // Render categories
+                    renderCategories();
+                    
+                    // Load channels for first category
+                    loadChannels(categories[0].category_id);
+                    
+                } catch (error) {
+                    console.error('Error loading categories:', error);
+                    showLoginMessage('Failed to load categories', true);
+                } finally {
+                    channelSpinner.style.display = 'none';
+                }
+            }
+            
+            // Render categories in sidebar
+            function renderCategories() {
+                categoryList.innerHTML = '';
+                
+                categories.forEach(category => {
+                    const item = document.createElement('li');
+                    item.className = 'category-item';
+                    item.textContent = category.category_name;
+                    item.dataset.categoryId = category.category_id;
+                    
+                    item.addEventListener('click', function() {
+                        // Set active category
+                        document.querySelectorAll('.category-item').forEach(i => {
+                            i.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        // Load channels
+                        loadChannels(this.dataset.categoryId);
+                    });
+                    
+                    // First item is active by default
+                    if (category.category_id === 'all') {
+                        item.classList.add('active');
+                    }
+                    
+                    categoryList.appendChild(item);
+                });
+            }
+            
+            // Load channels for a category
+            async function loadChannels(categoryId) {
+                channelSpinner.style.display = 'block';
+                channelGrid.innerHTML = '';
+                
+                try {
+                    let channelsUrl;
+                    
+                    if (categoryId === 'all') {
+                        channelsUrl = `${credentials.server}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_live_streams`;
                     } else {
-                        apiUrl = `${currentServer.url}/player_api.php?username=${currentServer.username}&password=${currentServer.password}&action=get_vod_streams&category_id=${category}`;
+                        channelsUrl = `${credentials.server}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_live_streams&category_id=${categoryId}`;
                     }
                     
-                    const response = await fetchWithCORS(apiUrl);
+                    const response = await fetch(channelsUrl);
+                    if (!response.ok) throw new Error('Failed to load channels');
                     
-                    if (!response.ok) {
-                        throw new Error('فشل تحميل القنوات');
-                    }
+                    channels = await response.json();
                     
-                    const channels = await response.json();
-                    
-                    if (channels.length === 0) {
-                        showAlert('لا توجد قنوات متاحة في هذا القسم', 'info');
-                        return;
-                    }
-                    
-                    renderChannels(channels);
+                    // Render channels
+                    renderChannels();
                     
                 } catch (error) {
                     console.error('Error loading channels:', error);
-                    showAlert(error.message || 'حدث خطأ أثناء تحميل القنوات', 'error');
+                    showLoginMessage('Failed to load channels', true);
                 } finally {
-                    showSpinner('channels-spinner', false);
+                    channelSpinner.style.display = 'none';
                 }
             }
             
-            // 5. عرض القنوات
-            function renderChannels(channels) {
+            // Render channels in grid
+            function renderChannels() {
+                channelGrid.innerHTML = '';
+                
                 channels.forEach(channel => {
-                    const channelCard = document.createElement('div');
-                    channelCard.className = 'channel-card';
+                    const card = document.createElement('div');
+                    card.className = 'channel-card';
                     
-                    const streamUrl = `${currentServer.url}/live/${currentServer.username}/${currentServer.password}/${channel.stream_id}.ts`;
+                    // Construct stream URL
+                    const streamUrl = `${credentials.server}/live/${credentials.username}/${credentials.password}/${channel.stream_id}.ts`;
                     
-                    channelCard.innerHTML = `
+                    card.innerHTML = `
                         <div class="channel-logo">
                             ${channel.stream_icon ? 
-                                `<img src="${channel.stream_icon}" alt="${channel.name}" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-tv\\'></i>'">` : 
-                                `<i class="fas fa-tv"></i>`}
+                                `<img src="${channel.stream_icon}" alt="${channel.name}" onerror="this.parentElement.textContent='📺'">` : 
+                                '📺'}
                         </div>
-                        <div class="channel-info">
+                        <div style="padding: 10px;">
                             <div style="font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${channel.name}</div>
                         </div>
                     `;
                     
-                    channelCard.addEventListener('click', () => {
-                        playStream(streamUrl, channel.name);
+                    card.addEventListener('click', function() {
+                        playChannel(streamUrl, channel.name);
+                        
+                        // Highlight selected channel
+                        document.querySelectorAll('.channel-card').forEach(c => {
+                            c.classList.remove('active');
+                        });
+                        this.classList.add('active');
                     });
                     
-                    channelsContainer.appendChild(channelCard);
+                    channelGrid.appendChild(card);
                 });
             }
             
-            // 6. تشغيل القناة مع دعم HLS و TS
-            function playStream(url, channelName) {
+            // Play a channel
+            function playChannel(url, channelName) {
+                // Stop any existing playback
                 if (hls) {
                     hls.destroy();
-                    hls = null;
                 }
                 
-                videoPlayer.pause();
-                videoPlayer.src = '';
-                nowPlaying.textContent = channelName;
+                player.pause();
                 
-                if (url.includes('.m3u8')) {
+                // Check for HLS stream
+                if (url.endsWith('.m3u8')) {
+                    // Initialize HLS.js if available
                     if (Hls.isSupported()) {
-                        hls = new Hls({
-                            maxBufferLength: 30,
-                            maxMaxBufferLength: 600,
-                            maxBufferSize: 60 * 1000 * 1000,
-                            enableWorker: true
-                        });
+                        hls = new Hls();
                         hls.loadSource(url);
-                        hls.attachMedia(videoPlayer);
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            videoPlayer.play().catch(e => {
-                                showAlert('تعذر تشغيل القناة', 'error');
+                        hls.attachMedia(player);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            player.play().catch(e => {
+                                console.error('Playback error:', e);
+                                alert('Error playing channel. Please try another.');
                             });
                         });
-                    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                        videoPlayer.src = url;
-                        videoPlayer.play().catch(e => {
-                            showAlert('تعذر تشغيل القناة', 'error');
+                    } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Native HLS support (Safari)
+                        player.src = url;
+                        player.play().catch(e => {
+                            console.error('Playback error:', e);
+                            alert('Error playing channel. Please try another.');
                         });
                     } else {
-                        showAlert('المتصفح لا يدعم تشغيل هذا النوع من القنوات', 'error');
+                        alert('HLS playback not supported in this browser');
                     }
                 } else {
-                    videoPlayer.src = url;
-                    videoPlayer.play().catch(e => {
-                        showAlert('تعذر تشغيل القناة', 'error');
+                    // Assume MPEG-TS stream
+                    player.src = url;
+                    player.play().catch(e => {
+                        console.error('Playback error:', e);
+                        alert('Error playing channel. Please try another.');
                     });
                 }
+                
+                // Update UI
+                document.title = `${channelName} - Xtream IPTV`;
             }
-            
-            // وظائف مساعدة
-            function showSpinner(id, show) {
-                document.getElementById(id).style.display = show ? 'block' : 'none';
-            }
-            
-            function showAlert(message, type) {
-                alertMessage.textContent = message;
-                alertMessage.className = `alert alert-${type}`;
-                alertMessage.style.display = 'block';
-            }
-            
-            function hideAlert() {
-                alertMessage.style.display = 'none';
-            }
-            
-            function showLoginMessage(message, type) {
-                const loginMsg = document.getElementById('login-message');
-                loginMsg.textContent = message;
-                loginMsg.style.display = 'block';
-                loginMsg.style.color = type === 'error' ? 'var(--error)' : 
-                                      type === 'success' ? 'var(--success)' : 'white';
-            }
-            
-            // أحداث
-            loginBtn.addEventListener('click', () => {
-                loginModal.style.display = 'flex';
-                document.getElementById('login-message').style.display = 'none';
-            });
-            
-            loginForm.addEventListener('submit', handleLogin);
-            
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    currentCategory = this.dataset.tab;
-                    loadChannels(currentCategory);
-                });
-            });
-            
-            // إغلاق النافذة عند النقر خارجها
-            loginModal.addEventListener('click', (e) => {
-                if (e.target === loginModal) {
-                    loginModal.style.display = 'none';
-                }
-            });
         });
     </script>
+    
+    <!-- HLS.js library for better HLS support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </body>
 </html>
