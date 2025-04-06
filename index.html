@@ -64,6 +64,35 @@
         let hls;
         let checkInterval;
 
+        // استرجاع آخر رابط Xtream من التخزين المحلي
+        document.addEventListener("DOMContentLoaded", function() {
+            const lastXtreamUrl = localStorage.getItem('lastXtreamUrl');
+            if (lastXtreamUrl) {
+                document.getElementById('xtreamInput').value = lastXtreamUrl;
+            }
+        });
+
+        function loadChannelsFromXtream(xtreamUrl) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", xtreamUrl, true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const data = xhr.responseText;
+                    channels = parseM3U(data);
+                    updateCategorySelect();
+                    notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!');
+                    // تخزين الرابط الأخير في التخزين المحلي
+                    localStorage.setItem('lastXtreamUrl', xtreamUrl);
+                } else {
+                    alert('فشل في تحميل رابط Xtream IPTV. تحقق من الرابط.');
+                }
+            };
+            xhr.onerror = function() {
+                alert('حدث خطأ أثناء تحميل رابط Xtream IPTV.');
+            };
+            xhr.send();
+        }
+
         function loadM3U() {
             const url = document.getElementById('urlInput').value;
             const xtreamUrl = document.getElementById('xtreamInput').value;
@@ -83,17 +112,7 @@
             } 
             
             if (xtreamUrl) {
-                fetch(xtreamUrl)
-                    .then(response => response.text())
-                    .then(data => {
-                        channels = parseM3U(data); // تحليل البيانات من Xtream
-                        updateCategorySelect();
-                        notifyUser('تم تحميل القنوات من رابط Xtream IPTV بنجاح!');
-                    })
-                    .catch(error => {
-                        console.error('خطأ في تحميل رابط Xtream IPTV:', error);
-                        alert('فشل في تحميل رابط Xtream IPTV. تحقق من الرابط.');
-                    });
+                loadChannelsFromXtream(xtreamUrl);
             } else {
                 alert('يرجى إدخال رابط ملف M3U أو رابط Xtream IPTV.');
             }
