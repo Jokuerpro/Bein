@@ -1,1771 +1,298 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro IPTV - مشغل قنوات متقدم</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --accent-color: #4895ef;
-            --dark-color: #1b263b;
-            --light-color: #f8f9fa;
-            --success-color: #4cc9f0;
-            --warning-color: #f8961e;
-            --danger-color: #f72585;
-            --gray-color: #adb5bd;
-            --dark-gray: #495057;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', 'Segoe UI', system-ui, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: var(--dark-color);
-            min-height: 100vh;
-            touch-action: manipulation;
-        }
-        
-        /* التصميم العام */
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        /* شريط العنوان العلوي */
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 0.8rem 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.8rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            position: relative;
-        }
-        
-        .app-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            white-space: nowrap;
-        }
-        
-        .app-title i {
-            font-size: 1rem;
-        }
-        
-        .header-controls {
-            display: flex;
-            gap: 0.8rem;
-            align-items: center;
-            flex: 1;
-            min-width: 0;
-            justify-content: flex-end;
-        }
-        
-        .input-group {
-            display: flex;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 0.5rem;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .input-group:focus-within {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
-        }
-        
-        .input-url {
-            padding: 0.6rem 0.8rem;
-            border: none;
-            background: transparent;
-            color: white;
-            width: 100%;
-            font-size: 0.85rem;
-            min-width: 0;
-        }
-        
-        .input-url::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .input-url:focus {
-            outline: none;
-        }
-        
-        .btn {
-            padding: 0.6rem 1rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.85rem;
-            white-space: nowrap;
-        }
-        
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #3a7bc8;
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-        
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn-sm {
-            padding: 0.4rem 0.7rem;
-            font-size: 0.8rem;
-        }
-        
-        /* منطقة المحتوى الرئيسية */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 56px);
-            position: relative;
-        }
-        
-        /* قوائم الجوال */
-        .mobile-tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #e9ecef;
-            z-index: 50;
-        }
-        
-        .mobile-tab {
-            flex: 1;
-            text-align: center;
-            padding: 0.8rem;
-            font-weight: 600;
-            color: var(--gray-color);
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .mobile-tab.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-        
-        /* محتوى الجوال */
-        .mobile-content {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .mobile-panel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            overflow-y: auto;
-            background: white;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 10;
-        }
-        
-        .mobile-panel.active {
-            transform: translateX(0);
-        }
-        
-        /* قائمة الفئات */
-        .categories {
-            overflow-y: auto;
-            height: 100%;
-        }
-        
-        .category-item {
-            padding: 0.8rem 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid #f1f3f5;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-        
-        .category-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .category-item.active {
-            background-color: #e6f2ff;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        .category-icon {
-            font-size: 0.9rem;
-            color: var(--gray-color);
-        }
-        
-        .category-item.active .category-icon {
-            color: var(--primary-color);
-        }
-        
-        /* قائمة القنوات - التصميم الجديد */
-        .channels {
-            overflow-y: auto;
-            height: 100%;
-        }
-        
-        .channel-item {
-            padding: 0.7rem 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            border-bottom: 1px solid #edf2f7;
-            transition: all 0.2s ease;
-        }
-        
-        .channel-item:hover {
-            background-color: #f1f3f5;
-        }
-        
-        .channel-item.active {
-            background-color: #e6f2ff;
-        }
-        
-        .channel-logo {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            object-fit: cover;
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6rem;
-            color: var(--dark-gray);
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        
-        .channel-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .channel-info {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-        
-        .channel-name {
-            font-size: 0.85rem;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .channel-group {
-            font-size: 0.65rem;
-            color: var(--gray-color);
-            margin-top: 0.1rem;
-            display: none; /* إخفاء المجموعة في العرض الجديد */
-        }
-        
-        /* مشغل الفيديو */
-        .player-container {
-            display: flex;
-            flex-direction: column;
-            background-color: #000;
-            position: relative;
-            height: 100%;
-        }
-        
-        .video-container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-            position: relative;
-        }
-        
-        #video-player {
-            width: 100%;
-            height: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            outline: none;
-        }
-        
-        .player-info {
-            padding: 0.7rem 1rem;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .player-actions {
-            display: flex;
-            gap: 0.7rem;
-        }
-        
-        .player-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            padding: 0.3rem;
-        }
-        
-        .player-btn:hover {
-            opacity: 1;
-        }
-        
-        .loading {
-            color: white;
-            font-size: 1rem;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .spinner {
-            width: 35px;
-            height: 35px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--accent-color);
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* رسائل التنبيه */
-        .alert {
-            padding: 0.8rem 1rem;
-            margin: 0.8rem;
-            border-radius: 0.5rem;
-            display: none;
-            align-items: center;
-            gap: 0.7rem;
-            animation: fadeIn 0.3s ease-out;
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            left: 1rem;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .alert-error {
-            background-color: #fff5f5;
-            color: var(--danger-color);
-            border: 1px solid #ffd6d6;
-        }
-        
-        .alert-success {
-            background-color: #f0fff4;
-            color: #2f855a;
-            border: 1px solid #c6f6d5;
-        }
-        
-        .alert i {
-            font-size: 1.1rem;
-        }
-        
-        .alert-close {
-            margin-right: auto;
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-        }
-        
-        /* إعدادات التطبيق */
-        .settings-panel {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 90%;
-            max-width: 350px;
-            background-color: white;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-            z-index: 200;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-        
-        .settings-panel.open {
-            transform: translateX(0);
-        }
-        
-        .settings-header {
-            padding: 1rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 10;
-        }
-        
-        .settings-title {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-        
-        .settings-close {
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: var(--gray-color);
-            padding: 0.3rem;
-        }
-        
-        .settings-content {
-            padding: 1rem;
-            flex: 1;
-        }
-        
-        .settings-section {
-            margin-bottom: 1.2rem;
-        }
-        
-        .settings-section-title {
-            font-weight: 600;
-            margin-bottom: 0.7rem;
-            color: var(--dark-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
-        }
-        
-        .settings-section-title i {
-            font-size: 0.8rem;
-            color: var(--gray-color);
-        }
-        
-        .form-group {
-            margin-bottom: 0.9rem;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-size: 0.8rem;
-            color: var(--dark-gray);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid #e9ecef;
-            border-radius: 0.4rem;
-            font-size: 0.85rem;
-            transition: border 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-        
-        .form-select {
-            width: 100%;
-            padding: 0.6rem;
-            border: 1px solid #e9ecef;
-            border-radius: 0.4rem;
-            font-size: 0.85rem;
-            background-color: white;
-        }
-        
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .form-check-input {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .form-check-label {
-            font-size: 0.8rem;
-        }
-        
-        /* قائمة التاريخ */
-        .history-list {
-            list-style: none;
-        }
-        
-        .history-item {
-            padding: 0.7rem 0;
-            border-bottom: 1px solid #f1f3f5;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            cursor: pointer;
-        }
-        
-        .history-item:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .history-item i {
-            color: var(--gray-color);
-            font-size: 0.8rem;
-        }
-        
-        .history-item-name {
-            flex: 1;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .history-item-date {
-            font-size: 0.65rem;
-            color: var(--gray-color);
-        }
-        
-        /* طبقة التعتيم */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 150;
-            display: none;
-        }
-        
-        .overlay.active {
-            display: block;
-        }
-        
-        /* عناصر متجاوبة */
-        @media (min-width: 768px) {
-            .container {
-                display: grid;
-                grid-template-rows: auto 1fr;
-            }
-            
-            .header {
-                padding: 0.8rem 1.5rem;
-                flex-wrap: nowrap;
-            }
-            
-            .app-title {
-                font-size: 1.3rem;
-            }
-            
-            .header-controls {
-                flex: 1;
-                justify-content: flex-end;
-            }
-            
-            .input-group {
-                max-width: 400px;
-            }
-            
-            .main-content {
-                display: grid;
-                grid-template-columns: 250px 300px 1fr;
-                height: calc(100vh - 60px);
-            }
-            
-            .mobile-tabs {
-                display: none;
-            }
-            
-            .mobile-content {
-                display: contents;
-            }
-            
-            .mobile-panel {
-                position: relative;
-                transform: none;
-            }
-            
-            .categories, .channels {
-                height: 100%;
-            }
-            
-            .player-container {
-                grid-column: span 1;
-            }
-            
-            /* تعديل حجم شعار القناة لسطح المكتب */
-            .channel-logo {
-                width: 28px;
-                height: 28px;
-                border-radius: 4px;
-            }
-        }
-        
-        @media (min-width: 992px) {
-            .main-content {
-                grid-template-columns: 250px 1fr;
-            }
-            
-            .player-container {
-                grid-column: span 2;
-            }
-        }
-        
-        /* تأثيرات إضافية */
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* تحسينات للهاتف */
-        @media (max-width: 767px) {
-            .header {
-                padding: 0.7rem;
-            }
-            
-            .btn {
-                padding: 0.5rem 0.8rem;
-            }
-            
-            .btn i {
-                margin: 0;
-            }
-            
-            .btn span {
-                display: none;
-            }
-            
-            .mobile-tab {
-                padding: 0.7rem;
-                font-size: 0.85rem;
-            }
-            
-            .category-item, .channel-item {
-                padding: 0.7rem;
-            }
-            
-            .player-info {
-                padding: 0.6rem;
-                font-size: 0.8rem;
-            }
-            
-            .player-btn {
-                font-size: 0.85rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>مشغل Xtream M3U</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #101820;
+    color: white;
+  }
+  
+  .header {
+    background: #00b894;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .input-area {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+  
+  .input-area input {
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    width: 300px;
+    max-width: 100%;
+  }
+  
+  .input-area button {
+    padding: 10px 20px;
+    background-color: #00695c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .input-area button:hover {
+    background-color: #004d40;
+  }
+  
+  .main-content {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  select, input[type="text"] {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    width: 100%;
+  }
+  
+  video {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+  
+  </style>
+
 </head>
 <body>
-    <div class="container">
-        <!-- شريط العنوان العلوي -->
-        <div class="header">
-            <div class="app-title">
-                <i class="fas fa-tv"></i>
-                <span>Pro IPTV</span>
-            </div>
-            <div class="header-controls">
-                <div class="input-group">
-                    <input type="text" class="input-url" placeholder="رابط Xtream أو M3U" id="playlist-url">
-                </div>
-                <button class="btn btn-primary" id="load-btn">
-                    <i class="fas fa-download"></i>
-                    <span>تحميل</span>
-                </button>
-                <button class="btn btn-outline" id="settings-btn">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- منطقة المحتوى الرئيسية -->
-        <div class="main-content">
-            <!-- للجوال: ألسنة التبويب -->
-            <div class="mobile-tabs">
-                <div class="mobile-tab active" data-panel="categories">
-                    <i class="fas fa-list"></i>
-                    <span>الفئات</span>
-                </div>
-                <div class="mobile-tab" data-panel="channels">
-                    <i class="fas fa-tv"></i>
-                    <span>القنوات</span>
-                </div>
-                <div class="mobile-tab" data-panel="player">
-                    <i class="fas fa-play"></i>
-                    <span>المشغل</span>
-                </div>
-            </div>
-            
-            <!-- محتوى الجوال -->
-            <div class="mobile-content">
-                <!-- قائمة الفئات (للجوال) -->
-                <div class="mobile-panel active" id="categories-panel">
-                    <div class="categories" id="categories-list"></div>
-                </div>
-                
-                <!-- قائمة القنوات (للجوال) -->
-                <div class="mobile-panel" id="channels-panel">
-                    <div class="channels" id="channels-list"></div>
-                </div>
-                
-                <!-- مشغل الفيديو (للجوال) -->
-                <div class="mobile-panel" id="player-panel">
-                    <div class="player-container">
-                        <div class="video-container">
-                            <div class="loading" id="loading-message">
-                                <div class="spinner"></div>
-                                <div>قم باختيار قناة للبدء</div>
-                            </div>
-                            <video id="video-player" controls playsinline></video>
-                        </div>
-                        <div class="player-info" id="player-info">
-                            <span id="current-channel-name">لا توجد قناة قيد التشغيل</span>
-                            <div class="player-actions">
-                                <button class="player-btn" id="fullscreen-btn" title="ملء الشاشة">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <header class="header">
+    <div class="logo">🎬 Xtream Player</div>
+    <div class="input-area">
+      <input type="text" id="m3uUrl" placeholder="أدخل رابط M3U">
+      <button onclick="loadM3U()">تحميل</button>
     </div>
-    
-    <!-- رسالة خطأ -->
-    <div class="alert alert-error" id="error-message" style="display: none;">
-        <i class="fas fa-exclamation-circle"></i>
-        <span id="error-text"></span>
-        <button class="alert-close">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    
-    <!-- رسالة نجاح -->
-    <div class="alert alert-success" id="success-message" style="display: none;">
-        <i class="fas fa-check-circle"></i>
-        <span id="success-text"></span>
-        <button class="alert-close">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    
-    <!-- طبقة التعتيم للإعدادات -->
-    <div class="overlay" id="settings-overlay"></div>
-    
-    <!-- لوحة الإعدادات -->
-    <div class="settings-panel" id="settings-panel">
-        <div class="settings-header">
-            <div class="settings-title">
-                <i class="fas fa-cog"></i>
-                <span>إعدادات التطبيق</span>
-            </div>
-            <button class="settings-close" id="settings-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="settings-content">
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="fas fa-sliders-h"></i>
-                    <span>الإعدادات العامة</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">وضع التشغيل</label>
-                    <select class="form-select" id="player-mode">
-                        <option value="hls">HLS (مستحسن)</option>
-                        <option value="native">تشغيل مباشر</option>
-                        <option value="proxy">استخدام خادم وكيل</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">جودة الفيديو الافتراضية</label>
-                    <select class="form-select" id="video-quality">
-                        <option value="auto">تلقائي</option>
-                        <option value="hd">عالية (HD)</option>
-                        <option value="sd">متوسطة (SD)</option>
-                        <option value="low">منخفضة</option>
-                    </select>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="save-history" checked>
-                    <label class="form-check-label" for="save-history">حفظ سجل المشاهدة</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="auto-play" checked>
-                    <label class="form-check-label" for="auto-play">تشغيل تلقائي عند اختيار قناة</label>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="fas fa-history"></i>
-                    <span>سجل المشاهدة</span>
-                </div>
-                <ul class="history-list" id="history-list"></ul>
-                <button class="btn btn-outline btn-sm" id="clear-history" style="margin-top: 0.8rem;">
-                    <i class="fas fa-trash"></i>
-                    <span>مسح السجل</span>
-                </button>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="fas fa-database"></i>
-                    <span>إدارة التخزين</span>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">مساحة التخزين المستخدمة</label>
-                    <div id="storage-used">0 KB</div>
-                </div>
-                <button class="btn btn-outline btn-sm" id="clear-storage">
-                    <i class="fas fa-broom"></i>
-                    <span>مسح جميع البيانات</span>
-                </button>
-            </div>
-        </div>
+  </header>
+
+  <main class="main-content">
+    <div class="controls">
+      <select id="categorySelect" onchange="showChannels()">
+        <option value="">اختر فئة</option>
+      </select>
+
+      <input type="text" id="searchInput" placeholder="🔍 ابحث عن قناة" oninput="searchChannels()">
+
+      <select id="channelSelect" onchange="playChannel()">
+        <option value="">اختر قناة</option>
+      </select>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // عناصر DOM
-            const playlistUrlInput = document.getElementById('playlist-url');
-            const loadBtn = document.getElementById('load-btn');
-            const categoriesList = document.getElementById('categories-list');
-            const channelsList = document.getElementById('channels-list');
-            const videoPlayer = document.getElementById('video-player');
-            const playerInfo = document.getElementById('player-info');
-            const currentChannelName = document.getElementById('current-channel-name');
-            const loadingMessage = document.getElementById('loading-message');
-            const errorMessage = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
-            const successMessage = document.getElementById('success-message');
-            const successText = document.getElementById('success-text');
-            const settingsBtn = document.getElementById('settings-btn');
-            const settingsPanel = document.getElementById('settings-panel');
-            const settingsOverlay = document.getElementById('settings-overlay');
-            const settingsClose = document.getElementById('settings-close');
-            const playerModeSelect = document.getElementById('player-mode');
-            const videoQualitySelect = document.getElementById('video-quality');
-            const saveHistoryCheck = document.getElementById('save-history');
-            const autoPlayCheck = document.getElementById('auto-play');
-            const historyList = document.getElementById('history-list');
-            const clearHistoryBtn = document.getElementById('clear-history');
-            const clearStorageBtn = document.getElementById('clear-storage');
-            const storageUsed = document.getElementById('storage-used');
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
-            const mobileTabs = document.querySelectorAll('.mobile-tab');
-            const mobilePanels = document.querySelectorAll('.mobile-panel');
-            const alertCloseBtns = document.querySelectorAll('.alert-close');
-            
-            // بيانات التطبيق
-            let categories = [];
-            let channels = [];
-            let currentCategory = null;
-            let currentChannel = null;
-            let hls = null;
-            let appSettings = {};
-            let history = [];
-            
-            // تهيئة التطبيق
-            initApp();
-            
-            // تهيئة التطبيق
-            function initApp() {
-                loadSettings();
-                loadHistory();
-                updateStorageUsage();
-                setupEventListeners();
-                
-                // محاولة تحميل آخر قائمة تشغيل تم استخدامها
-                const lastPlaylist = localStorage.getItem('lastPlaylist');
-                if (lastPlaylist) {
-                    playlistUrlInput.value = lastPlaylist;
-                }
-                
-                // تحديد وضع الجوال أو سطح المكتب
-                setupMobileView();
-            }
-            
-            // إعداد واجهة الجوال
-            function setupMobileView() {
-                if (window.innerWidth < 768) {
-                    // إخفاء لوحة المشغل في البداية على الجوال
-                    document.getElementById('player-panel').classList.remove('active');
-                }
-            }
-            
-            // إعداد مستمعي الأحداث
-            function setupEventListeners() {
-                // تحميل القنوات
-                loadBtn.addEventListener('click', loadPlaylistFromInput);
-                
-                // عند الضغط على Enter في حقل الإدخال
-                playlistUrlInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        loadPlaylistFromInput();
-                    }
-                });
-                
-                // فتح/إغلاق الإعدادات
-                settingsBtn.addEventListener('click', openSettings);
-                settingsClose.addEventListener('click', closeSettings);
-                settingsOverlay.addEventListener('click', closeSettings);
-                
-                // حفظ الإعدادات عند التغيير
-                playerModeSelect.addEventListener('change', saveSettings);
-                videoQualitySelect.addEventListener('change', saveSettings);
-                saveHistoryCheck.addEventListener('change', saveSettings);
-                autoPlayCheck.addEventListener('change', saveSettings);
-                
-                // إدارة السجل
-                clearHistoryBtn.addEventListener('click', clearHistory);
-                clearStorageBtn.addEventListener('click', clearStorage);
-                
-                // ملء الشاشة
-                fullscreenBtn.addEventListener('click', toggleFullscreen);
-                
-                // إدارة وضع ملء الشاشة
-                videoPlayer.addEventListener('fullscreenchange', handleFullscreenChange);
-                videoPlayer.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-                
-                // تبديل ألسنة التبويب على الجوال
-                mobileTabs.forEach(tab => {
-                    tab.addEventListener('click', function() {
-                        const panelId = this.dataset.panel + '-panel';
-                        
-                        // تحديث التبويبات النشطة
-                        mobileTabs.forEach(t => t.classList.remove('active'));
-                        this.classList.add('active');
-                        
-                        // تحديث اللوحات النشطة
-                        mobilePanels.forEach(p => p.classList.remove('active'));
-                        document.getElementById(panelId).classList.add('active');
-                    });
-                });
-                
-                // إغلاق رسائل التنبيه
-                alertCloseBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        this.closest('.alert').style.display = 'none';
-                    });
-                });
-                
-                // عند إغلاق الصفحة
-                window.addEventListener('beforeunload', cleanupPlayer);
-                
-                // عند تغيير حجم النافذة
-                window.addEventListener('resize', setupMobileView);
-            }
-            
-            // تحميل القائمة من حقل الإدخال
-            function loadPlaylistFromInput() {
-                const url = playlistUrlInput.value.trim();
-                
-                if (!url) {
-                    showError('الرجاء إدخال رابط صحيح');
-                    return;
-                }
-                
-                // حفظ الرابط كآخر قائمة تم استخدامها
-                localStorage.setItem('lastPlaylist', url);
-                
-                loadPlaylist(url);
-            }
-            
-            // تحميل قائمة التشغيل
-            function loadPlaylist(url) {
-                showLoading('جاري تحميل القنوات...');
-                clearError();
-                clearSuccess();
-                
-                // مسح البيانات القديمة
-                categories = [];
-                channels = [];
-                currentCategory = null;
-                currentChannel = null;
-                
-                renderCategories();
-                renderChannels();
-                
-                // تحقق إذا كان رابط Xtream
-                if (url.includes('get.php') || url.includes('player_api.php')) {
-                    loadXtreamPlaylist(url);
-                } 
-                // إذا كان ملف M3U
-                else if (url.endsWith('.m3u') || url.endsWith('.m3u8')) {
-                    loadM3UPlaylist(url);
-                } else {
-                    showError('رابط غير معروف. الرجاء استخدام رابط Xtream أو M3U');
-                }
-            }
-            
-            // تحميل قائمة Xtream
-            function loadXtreamPlaylist(url) {
-                let apiUrl = '';
-                
-                try {
-                    const parsedUrl = new URL(url);
-                    const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-                    
-                    if (url.includes('get.php')) {
-                        // رابط مباشر للقنوات
-                        apiUrl = url;
-                    } else {
-                        // رابط واجهة برمجة التطبيقات
-                        apiUrl = `${baseUrl}/player_api.php?username=${parsedUrl.searchParams.get('username')}&password=${parsedUrl.searchParams.get('password')}`;
-                    }
-                    
-                    // جلب الفئات
-                    fetchWithCorsProxy(`${apiUrl}&action=get_live_categories`)
-                        .then(response => response.json())
-                        .then(data => {
-                            categories = data;
-                            renderCategories();
-                            
-                            // جلب القنوات للفئة الأولى افتراضياً
-                            if (categories.length > 0) {
-                                loadCategoryChannels(categories[0].category_id);
-                            } else {
-                                hideLoading();
-                                showError('لا توجد فئات في هذه القائمة');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error loading categories:', error);
-                            showError('فشل في تحميل الفئات. الرجاء التحقق من الرابط');
-                        });
-                    
-                } catch (e) {
-                    console.error('Error parsing URL:', e);
-                    showError('رابط غير صحيح. الرجاء التحقق من الرابط');
-                }
-            }
-            
-            // تحميل قائمة M3U
-            function loadM3UPlaylist(url) {
-                fetchWithCorsProxy(url)
-                    .then(response => response.text())
-                    .then(data => {
-                        // تحليل ملف M3U
-                        const lines = data.split('\n');
-                        categories = [];
-                        channels = [];
-                        
-                        let currentGroup = 'عام';
-                        let currentChannel = {};
-                        
-                        for (const line of lines) {
-                            if (line.startsWith('#EXTINF')) {
-                                // معلومات القناة
-                                const params = line.split(',');
-                                const infoPart = params[0];
-                                const name = params.slice(1).join(',');
-                                
-                                // استخراج مجموعة القناة
-                                const groupMatch = infoPart.match(/group-title="([^"]+)"/);
-                                if (groupMatch && groupMatch[1]) {
-                                    currentGroup = groupMatch[1];
-                                }
-                                
-                                // استخراج معرف القناة
-                                const idMatch = infoPart.match(/tvg-id="([^"]+)"/);
-                                const channelId = idMatch ? idMatch[1] : Math.random().toString(36).substr(2, 9);
-                                
-                                // استخراج شعار القناة
-                                const logoMatch = infoPart.match(/tvg-logo="([^"]+)"/);
-                                const logo = logoMatch ? logoMatch[1] : '';
-                                
-                                currentChannel = {
-                                    id: channelId,
-                                    name: name.trim(),
-                                    group: currentGroup,
-                                    logo: logo,
-                                    url: ''
-                                };
-                                
-                                // إضافة الفئة إذا لم تكن موجودة
-                                if (!categories.some(cat => cat.name === currentGroup)) {
-                                    categories.push({
-                                        category_id: currentGroup,
-                                        category_name: currentGroup,
-                                        parent_id: 0
-                                    });
-                                }
-                            } else if (line.trim() && !line.startsWith('#') && line.includes('://')) {
-                                // رابط القناة
-                                currentChannel.url = line.trim();
-                                channels.push(currentChannel);
-                                currentChannel = {};
-                            }
-                        }
-                        
-                        renderCategories();
-                        
-                        // إذا كان هناك فئات، عرض القنوات للفئة الأولى
-                        if (categories.length > 0) {
-                            loadCategoryChannels(categories[0].category_id);
-                        } else {
-                            hideLoading();
-                            showError('لا توجد فئات في هذه القائمة');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading M3U:', error);
-                        showError('فشل في تحميل ملف M3U. الرجاء التحقق من الرابط');
-                    });
-            }
-            
-            // جلب البيانات مع تجاوز قيود CORS
-            function fetchWithCorsProxy(url) {
-                // يمكنك استخدام خادم وكيل هنا إذا لزم الأمر
-                // مثال: return fetch(`https://cors-anywhere.herokuapp.com/${url}`);
-                
-                // في هذا المثال، سنستخدم fetch مباشرة مع تحسينات
-                return fetch(url, {
-                    headers: {
-                        'Origin': window.location.origin,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    mode: 'cors',
-                    credentials: 'omit'
-                }).then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response;
-                });
-            }
-            
-            // تحميل قنوات فئة محددة
-            function loadCategoryChannels(categoryId) {
-                currentCategory = categoryId;
-                
-                let filteredChannels = [];
-                
-                if (channels.length === 0) {
-                    // إذا كانت القنوات غير محملة بعد (حالة Xtream)
-                    fetchWithCorsProxy(`${playlistUrlInput.value}&action=get_live_streams&category_id=${categoryId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            channels = data;
-                            renderChannels(data);
-                        })
-                        .catch(error => {
-                            console.error('Error loading channels:', error);
-                            showError('فشل في تحميل القنوات');
-                        });
-                } else {
-                    // إذا كانت القنوات محملة (حالة M3U)
-                    filteredChannels = channels.filter(ch => 
-                        ch.group === categoryId || ch.category_id === categoryId
-                    );
-                    renderChannels(filteredChannels);
-                }
-            }
-            
-            // عرض الفئات
-            function renderCategories() {
-                categoriesList.innerHTML = '';
-                
-                categories.forEach(category => {
-                    const categoryItem = document.createElement('div');
-                    categoryItem.className = 'category-item';
-                    categoryItem.innerHTML = `
-                        <i class="fas fa-folder category-icon"></i>
-                        <span>${category.category_name || category.name}</span>
-                    `;
-                    categoryItem.dataset.id = category.category_id || category.id;
-                    
-                    categoryItem.addEventListener('click', function() {
-                        // إزالة التنشيط من جميع الفئات
-                        document.querySelectorAll('.category-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        // تنشيط الفئة المحددة
-                        this.classList.add('active');
-                        
-                        // تحميل قنوات الفئة
-                        loadCategoryChannels(this.dataset.id);
-                        
-                        // على الجوال، انتقل إلى لوحة القنوات بعد الاختيار
-                        if (window.innerWidth < 768) {
-                            document.querySelector('.mobile-tab[data-panel="channels"]').click();
-                        }
-                    });
-                    
-                    categoriesList.appendChild(categoryItem);
-                });
-                
-                // تنشيط الفئة الأولى افتراضياً
-                if (categories.length > 0) {
-                    categoriesList.querySelector('.category-item').classList.add('active');
-                }
-            }
-            
-            // عرض القنوات - النسخة المعدلة لعرض الشعارات الصغيرة
-            function renderChannels(channelList = []) {
-                channelsList.innerHTML = '';
-                
-                if (!channelList || channelList.length === 0) {
-                    channelsList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--gray-color);">لا توجد قنوات في هذه الفئة</div>';
-                    return;
-                }
-                
-                channelList.forEach(channel => {
-                    const channelItem = document.createElement('div');
-                    channelItem.className = 'channel-item';
-                    channelItem.dataset.id = channel.stream_id || channel.id;
-                    channelItem.dataset.url = channel.url || `${playlistUrlInput.value}&action=watch&stream_id=${channel.stream_id}`;
-                    
-                    // صورة القناة - التصميم الجديد
-                    const logoContainer = document.createElement('div');
-                    logoContainer.className = 'channel-logo';
-                    
-                    if (channel.logo) {
-                        logoContainer.innerHTML = `<img src="${channel.logo}" alt="${channel.name}" onerror="this.parentElement.innerHTML='${getInitials(channel.name)}'">`;
-                    } else {
-                        logoContainer.textContent = getInitials(channel.name);
-                    }
-                    
-                    // معلومات القناة - التصميم الجديد
-                    const channelInfo = document.createElement('div');
-                    channelInfo.className = 'channel-info';
-                    
-                    // إضافة الشعار الصغير مرة أخرى بجانب الاسم
-                    const smallLogo = document.createElement('div');
-                    smallLogo.className = 'channel-logo';
-                    smallLogo.style.width = '20px';
-                    smallLogo.style.height = '20px';
-                    smallLogo.style.fontSize = '0.5rem';
-                    
-                    if (channel.logo) {
-                        smallLogo.innerHTML = `<img src="${channel.logo}" alt="${channel.name}" onerror="this.parentElement.innerHTML='${getInitials(channel.name)}'">`;
-                    } else {
-                        smallLogo.textContent = getInitials(channel.name);
-                    }
-                    
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'channel-name';
-                    nameSpan.textContent = channel.name || channel.stream_name;
-                    
-                    channelInfo.appendChild(smallLogo);
-                    channelInfo.appendChild(nameSpan);
-                    
-                    channelItem.appendChild(logoContainer);
-                    channelItem.appendChild(channelInfo);
-                    
-                    channelItem.addEventListener('click', function() {
-                        // إزالة التنشيط من جميع القنوات
-                        document.querySelectorAll('.channel-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        // تنشيط القناة المحددة
-                        this.classList.add('active');
-                        
-                        // حفظ القناة الحالية
-                        currentChannel = {
-                            id: this.dataset.id,
-                            name: channel.name || channel.stream_name,
-                            url: this.dataset.url,
-                            group: channel.group || channel.category_name,
-                            logo: channel.logo
-                        };
-                        
-                        // تشغيل القناة
-                        playChannel(currentChannel.url, currentChannel.name);
-                        
-                        // إضافة إلى السجل إذا كان مفعلًا
-                        if (appSettings.saveHistory) {
-                            addToHistory(currentChannel);
-                        }
-                        
-                        // على الجوال، انتقل إلى لوحة المشغل بعد الاختيار
-                        if (window.innerWidth < 768) {
-                            document.querySelector('.mobile-tab[data-panel="player"]').click();
-                        }
-                    });
-                    
-                    channelsList.appendChild(channelItem);
-                });
-            }
-            
-            // الحصول على الأحرف الأولى من اسم القناة
-            function getInitials(name) {
-                if (!name) return '';
-                const words = name.split(' ');
-                let initials = '';
-                
-                for (let i = 0; i < Math.min(2, words.length); i++) {
-                    if (words[i].length > 0) {
-                        initials += words[i][0].toUpperCase();
-                    }
-                }
-                
-                return initials;
-            }
-            
-            // تشغيل القناة
-            function playChannel(url, name) {
-                showLoading('جاري تحميل القناة...');
-                currentChannelName.textContent = name;
-                
-                // تنظيف المشغل السابق
-                cleanupPlayer();
-                
-                // إعداد المشغل الجديد حسب الإعدادات
-                const playerMode = appSettings.playerMode || 'hls';
-                
-                if (playerMode === 'hls' && Hls.isSupported()) {
-                    playWithHls(url);
-                } else if (playerMode === 'proxy') {
-                    playWithProxy(url);
-                } else {
-                    playNative(url);
-                }
-            }
-            
-            // تشغيل باستخدام HLS.js
-            function playWithHls(url) {
-                hls = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 600,
-                    maxBufferSize: 60 * 1000 * 1000,
-                    maxBufferHole: 0.5,
-                    lowLatencyMode: false,
-                    enableWorker: true,
-                    startLevel: -1, // تلقائي
-                    abrEwmaDefaultEstimate: 500000, // 500kbps
-                    abrBandWidthFactor: 0.95,
-                    abrBandWidthUpFactor: 0.7,
-                    abrEwmaSlowLive: 5.0,
-                    abrEwmaFastLive: 1.0,
-                    abrEwmaSlowVoD: 5.0,
-                    abrEwmaFastVoD: 1.0,
-                });
-                
-                hls.loadSource(url);
-                hls.attachMedia(videoPlayer);
-                
-                hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                    videoPlayer.play().then(() => {
-                        hideLoading();
-                        showSuccess('جاري تشغيل القناة...');
-                    }).catch(error => {
-                        console.error('Playback error:', error);
-                        showError('لا يمكن تشغيل القناة. الرجاء تجربة وضع تشغيل آخر من الإعدادات');
-                    });
-                });
-                
-                hls.on(Hls.Events.ERROR, function(event, data) {
-                    if (data.fatal) {
-                        switch(data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                showError('خطأ في الشبكة. جاري المحاولة بالتشغيل المباشر...');
-                                setTimeout(() => playNative(url), 2000);
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                showError('خطأ في الوسائط. جاري المحاولة بالتشغيل المباشر...');
-                                setTimeout(() => playNative(url), 2000);
-                                break;
-                            default:
-                                playNative(url);
-                                break;
-                        }
-                    }
-                });
-            }
-            
-            // تشغيل باستخدام خادم وكيل (نظري)
-            function playWithProxy(url) {
-                // هنا يمكنك إضافة عنوان خادم الوكيل الخاص بك
-                const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
-                
-                // في هذا المثال سنستخدم التشغيل المباشر مع تحذير
-                showError('خاصية الخادم الوكيل تحت التطوير. جاري استخدام التشغيل المباشر...');
-                playNative(url);
-            }
-            
-            // تشغيل مباشر
-            function playNative(url) {
-                videoPlayer.src = url;
-                videoPlayer.play()
-                    .then(() => {
-                        hideLoading();
-                        showSuccess('جاري تشغيل القناة...');
-                    })
-                    .catch(error => {
-                        console.error('Native playback error:', error);
-                        showError('لا يمكن تشغيل هذه القناة. الرجاء تجربة قناة أخرى');
-                    });
-            }
-            
-            // تنظيف المشغل
-            function cleanupPlayer() {
-                if (hls) {
-                    hls.destroy();
-                    hls = null;
-                }
-                
-                videoPlayer.src = '';
-                videoPlayer.load();
-            }
-            
-            // إدارة السجل
-            function loadHistory() {
-                const savedHistory = localStorage.getItem('iptvHistory');
-                history = savedHistory ? JSON.parse(savedHistory) : [];
-                renderHistory();
-            }
-            
-            function renderHistory() {
-                historyList.innerHTML = '';
-                
-                if (history.length === 0) {
-                    historyList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--gray-color);">لا يوجد سجل مشاهدة</div>';
-                    return;
-                }
-                
-                // عرض آخر 20 عنصراً
-                const recentHistory = history.slice(0, 20);
-                
-                recentHistory.forEach(item => {
-                    const historyItem = document.createElement('li');
-                    historyItem.className = 'history-item';
-                    
-                    // إضافة شعار القناة الصغير للسجل
-                    const channel = findChannelById(item.id);
-                    const logo = document.createElement('div');
-                    logo.className = 'channel-logo';
-                    logo.style.width = '20px';
-                    logo.style.height = '20px';
-                    logo.style.fontSize = '0.5rem';
-                    
-                    if (channel && channel.logo) {
-                        logo.innerHTML = `<img src="${channel.logo}" alt="${item.name}" onerror="this.innerHTML='${getInitials(item.name)}'">`;
-                    } else {
-                        logo.textContent = getInitials(item.name);
-                    }
-                    
-                    historyItem.appendChild(logo);
-                    
-                    const infoDiv = document.createElement('div');
-                    infoDiv.style.flex = '1';
-                    infoDiv.style.overflow = 'hidden';
-                    
-                    const nameDiv = document.createElement('div');
-                    nameDiv.className = 'history-item-name';
-                    nameDiv.textContent = item.name;
-                    
-                    const dateDiv = document.createElement('div');
-                    dateDiv.className = 'history-item-date';
-                    dateDiv.textContent = formatDate(item.timestamp);
-                    
-                    infoDiv.appendChild(nameDiv);
-                    infoDiv.appendChild(dateDiv);
-                    
-                    historyItem.appendChild(infoDiv);
-                    
-                    historyItem.addEventListener('click', function() {
-                        // البحث عن القناة في البيانات الحالية
-                        const channel = findChannelById(item.id);
-                        
-                        if (channel) {
-                            // تحديد الفئة أولاً
-                            const categoryElement = document.querySelector(`.category-item[data-id="${channel.group || channel.category_id}"]`);
-                            if (categoryElement) {
-                                categoryElement.click();
-                                
-                                // انتظر قليلاً لتحميل القنوات
-                                setTimeout(() => {
-                                    const channelElement = document.querySelector(`.channel-item[data-id="${item.id}"]`);
-                                    if (channelElement) {
-                                        channelElement.click();
-                                    }
-                                }, 300);
-                            }
-                        } else {
-                            showError('القناة غير متوفرة في القائمة الحالية');
-                        }
-                        
-                        // إغلاق الإعدادات
-                        closeSettings();
-                    });
-                    
-                    historyList.appendChild(historyItem);
-                });
-            }
-            
-            // البحث عن قناة بالمعرف
-            function findChannelById(id) {
-                return channels.find(ch => ch.id === id || ch.stream_id === id);
-            }
-            
-            // إضافة إلى السجل
-            function addToHistory(channel) {
-                // تجنب التكرار
-                history = history.filter(item => item.id !== channel.id);
-                
-                // إضافة في المقدمة
-                history.unshift({
-                    id: channel.id,
-                    name: channel.name,
-                    group: channel.group,
-                    url: channel.url,
-                    timestamp: Date.now()
-                });
-                
-                // حفظ السجل
-                localStorage.setItem('iptvHistory', JSON.stringify(history));
-                renderHistory();
-                updateStorageUsage();
-            }
-            
-            // مسح السجل
-            function clearHistory() {
-                history = [];
-                localStorage.removeItem('iptvHistory');
-                renderHistory();
-                updateStorageUsage();
-                showSuccess('تم مسح سجل المشاهدة');
-            }
-            
-            // مسح جميع البيانات
-            function clearStorage() {
-                localStorage.clear();
-                loadSettings();
-                loadHistory();
-                updateStorageUsage();
-                showSuccess('تم مسح جميع البيانات المحفوظة');
-            }
-            
-            // تحديث عرض مساحة التخزين
-            function updateStorageUsage() {
-                let total = 0;
-                
-                for (const key in localStorage) {
-                    if (localStorage.hasOwnProperty(key)) {
-                        total += localStorage.getItem(key).length * 2; // تقدير الحجم بالبايت
-                    }
-                }
-                
-                const sizeInKB = Math.round(total / 1024);
-                storageUsed.textContent = sizeInKB >= 1024 
-                    ? `${(sizeInKB / 1024).toFixed(1)} MB` 
-                    : `${sizeInKB} KB`;
-            }
-            
-            // تنسيق التاريخ
-            function formatDate(timestamp) {
-                const date = new Date(timestamp);
-                return date.toLocaleDateString('ar-EG', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-            
-            // إدارة الإعدادات
-            function loadSettings() {
-                const savedSettings = localStorage.getItem('iptvSettings');
-                appSettings = savedSettings ? JSON.parse(savedSettings) : {
-                    playerMode: 'hls',
-                    videoQuality: 'auto',
-                    saveHistory: true,
-                    autoPlay: true
-                };
-                
-                // تطبيق الإعدادات على واجهة المستخدم
-                playerModeSelect.value = appSettings.playerMode;
-                videoQualitySelect.value = appSettings.videoQuality;
-                saveHistoryCheck.checked = appSettings.saveHistory;
-                autoPlayCheck.checked = appSettings.autoPlay;
-            }
-            
-            function saveSettings() {
-                appSettings = {
-                    playerMode: playerModeSelect.value,
-                    videoQuality: videoQualitySelect.value,
-                    saveHistory: saveHistoryCheck.checked,
-                    autoPlay: autoPlayCheck.checked
-                };
-                
-                localStorage.setItem('iptvSettings', JSON.stringify(appSettings));
-                showSuccess('تم حفظ الإعدادات');
-            }
-            
-            // إدارة واجهة المستخدم
-            function showLoading(message) {
-                loadingMessage.innerHTML = `
-                    <div class="spinner"></div>
-                    <div>${message}</div>
-                `;
-                loadingMessage.style.display = 'flex';
-                videoPlayer.style.display = 'none';
-            }
-            
-            function hideLoading() {
-                loadingMessage.style.display = 'none';
-                videoPlayer.style.display = 'block';
-            }
-            
-            function showError(message) {
-                errorText.textContent = message;
-                errorMessage.style.display = 'flex';
-                
-                // إخفاء الرسالة بعد 5 ثواني
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 5000);
-            }
-            
-            function clearError() {
-                errorMessage.style.display = 'none';
-            }
-            
-            function showSuccess(message) {
-                successText.textContent = message;
-                successMessage.style.display = 'flex';
-                
-                // إخفاء الرسالة بعد 3 ثواني
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 3000);
-            }
-            
-            function clearSuccess() {
-                successMessage.style.display = 'none';
-            }
-            
-            // إدارة الإعدادات
-            function openSettings() {
-                settingsPanel.classList.add('open');
-                settingsOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            function closeSettings() {
-                settingsPanel.classList.remove('open');
-                settingsOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-            
-            // إدارة ملء الشاشة
-            function toggleFullscreen() {
-                if (!document.fullscreenElement) {
-                    if (videoPlayer.requestFullscreen) {
-                        videoPlayer.requestFullscreen();
-                    } else if (videoPlayer.webkitRequestFullscreen) {
-                        videoPlayer.webkitRequestFullscreen();
-                    } else if (videoPlayer.msRequestFullscreen) {
-                        videoPlayer.msRequestFullscreen();
-                    }
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        document.msExitFullscreen();
-                    }
-                }
-            }
-            
-            function handleFullscreenChange() {
-                const icon = fullscreenBtn.querySelector('i');
-                if (document.fullscreenElement) {
-                    icon.classList.replace('fa-expand', 'fa-compress');
-                } else {
-                    icon.classList.replace('fa-compress', 'fa-expand');
-                }
-            }
-        });
-    </script>
-    
-    <!-- مكتبة HLS.js لتشغيل تنسيقات HLS -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    
-    <!-- خط عربي -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <video id="player" controls autoplay></video>
+  </main>
+
+  <script>
+    let categories = {};
+let channels = [];
+let currentCategory = [];
+let channelQuality = {};  // لتخزين القنوات بجودات مختلفة
+
+window.onload = () => {
+  const lastUrl = localStorage.getItem('lastM3U');
+  if (lastUrl) {
+    document.getElementById('m3uUrl').value = lastUrl;
+  }
+};
+
+function loadM3U() {
+  const url = document.getElementById('m3uUrl').value.trim();
+  if (!url) {
+    alert("يرجى إدخال رابط M3U.");
+    return;
+  }
+
+  localStorage.setItem('lastM3U', url);
+
+  fetch(url)
+    .then(response => response.text())
+    .then(data => parseM3U(data))
+    .catch(err => alert("خطأ في تحميل الملف: " + err));
+}
+
+function parseM3U(data) {
+  categories = {};
+  channels = [];
+  channelQuality = {};  // إعادة تهيئة في كل مرة
+
+  const lines = data.split('\n');
+  let currentChannel = {};
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('#EXTINF')) {
+      const nameMatch = lines[i].match(/,(.*)/);
+      const groupMatch = lines[i].match(/group-title="(.*?)"/);
+      currentChannel = {
+        name: nameMatch ? nameMatch[1] : "غير معروف",
+        group: groupMatch ? groupMatch[1] : "غير مصنفة"
+      };
+    } else if (lines[i].startsWith('http')) {
+      currentChannel.url = lines[i];
+
+      // تقسيم القناة بناءً على الجودة (ملاحظة: إذا كانت الجودة في اسم القناة)
+      const qualityMatch = currentChannel.name.match(/(HD|SD|FHD|4K)/i);
+      const quality = qualityMatch ? qualityMatch[1].toUpperCase() : 'SD'; // افتراض SD إذا لم توجد
+
+      // إذا كانت القناة موجودة بالفعل في القنوات، نضيفها كجودة جديدة
+      if (!channelQuality[currentChannel.name]) {
+        channelQuality[currentChannel.name] = [];
+      }
+      channelQuality[currentChannel.name].push({ url: currentChannel.url, quality: quality });
+
+      // إضافة القناة إلى القائمة الرئيسية
+      if (!categories[currentChannel.group]) {
+        categories[currentChannel.group] = [];
+      }
+      categories[currentChannel.group].push({...currentChannel});
+      channels.push({...currentChannel});
+    }
+  }
+
+  fillCategories();
+}
+
+function fillCategories() {
+  const select = document.getElementById('categorySelect');
+  select.innerHTML = '<option value="">اختر فئة</option>';
+
+  Object.keys(categories).forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    select.appendChild(option);
+  });
+
+  document.getElementById('channelSelect').innerHTML = '<option value="">اختر قناة</option>';
+}
+
+function showChannels() {
+  const cat = document.getElementById('categorySelect').value;
+  const select = document.getElementById('channelSelect');
+  select.innerHTML = '<option value="">اختر قناة</option>';
+
+  currentCategory = cat && categories[cat] ? categories[cat] : [];
+
+  currentCategory.forEach(ch => {
+    const option = document.createElement('option');
+    option.value = ch.name;  // حفظ اسم القناة
+    option.textContent = ch.name;
+    select.appendChild(option);
+  });
+
+  document.getElementById('searchInput').value = "";
+}
+
+function searchChannels() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const select = document.getElementById('channelSelect');
+  select.innerHTML = '<option value="">اختر قناة</option>';
+
+  currentCategory
+    .filter(ch => ch.name.toLowerCase().includes(keyword))
+    .forEach(ch => {
+      const option = document.createElement('option');
+      option.value = ch.name;  // حفظ اسم القناة
+      option.textContent = ch.name;
+      select.appendChild(option);
+    });
+}
+
+function playChannel() {
+  const channelName = document.getElementById('channelSelect').value;
+  const video = document.getElementById('player');
+
+  if (!channelName) return;
+
+  // إذا كانت هناك قنوات بجودات متعددة
+  const availableQualities = channelQuality[channelName];
+  if (availableQualities && availableQualities.length > 1) {
+    const qualitySelect = document.createElement('select');
+    qualitySelect.id = 'qualitySelect';
+    availableQualities.forEach(quality => {
+      const option = document.createElement('option');
+      option.value = quality.url;
+      option.textContent = quality.quality;
+      qualitySelect.appendChild(option);
+    });
+
+    // إضافة زر لتحديد الجودة
+    const qualityDiv = document.createElement('div');
+    qualityDiv.textContent = 'اختر الجودة: ';
+    qualityDiv.appendChild(qualitySelect);
+    document.querySelector('.controls').appendChild(qualityDiv);
+
+    // عند تغيير الجودة، قم بتشغيل القناة بالجودة المحددة
+    qualitySelect.addEventListener('change', function () {
+      const selectedUrl = qualitySelect.value;
+      playSelectedQuality(selectedUrl);
+    });
+
+    // تشغيل الجودة الافتراضية الأولى
+    playSelectedQuality(availableQualities[0].url);
+  } else {
+    // إذا كان هناك رابط واحد فقط للجودة، نقوم بتشغيله مباشرة
+    playSelectedQuality(availableQualities[0].url);
+  }
+}
+
+function playSelectedQuality(url) {
+  const video = document.getElementById('player');
+
+  // تنظيف المشغل السابق
+  if (window.hls) {
+    window.hls.destroy();
+    window.hls = null;
+  }
+
+  const isHLS = url.endsWith(".m3u8") || url.endsWith(".ts") || url.includes("/live/");
+
+  if (isHLS && Hls.isSupported()) {
+    window.hls = new Hls();
+    window.hls.loadSource(url);
+    window.hls.attachMedia(video);
+
+    window.hls.on(Hls.Events.ERROR, function (event, data) {
+      console.error("HLS error:", data);
+      alert("حدث خطأ أثناء تشغيل القناة.");
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+    video.play();
+  } else {
+    video.src = url;
+    video.play();
+  }
+}
+  </script>
 </body>
 </html>
